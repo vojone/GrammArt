@@ -1,12 +1,22 @@
-const canvas = document.getElementById("main-canvas");
-const ctx = canvas.getContext("2d");
+/**
+ * The main file
+ */
 
-if(ctx !== null) {
+// Just hack to avoid Wrong MIME type error caused by loading tree sitter library
+delete WebAssembly.instantiateStreaming;
+const Parser = window.TreeSitter;
 
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, 500, 500);
-    ctx.fillStyle = "red";
-    ctx.fillRect(0, 0, 150, 75);
+(async() => {
+    await Parser.init()
+    await parse();
+})();
 
-    downloadCanvasContent("main-canvas", "high", 500, 500);
+async function parse(params) {
+    const parser = new Parser();
+    const JavaScript = await Parser.Language.load('tree-sitter-grammartcfg/tree-sitter-grammartcfg.wasm');
+    parser.setLanguage(JavaScript);
+    const sourceCode = 'hello';
+    const tree = parser.parse(sourceCode);
+    console.log(tree);
+    console.log(tree.rootNode.toString());
 }
