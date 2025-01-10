@@ -1,0 +1,50 @@
+==========
+Empty rule
+==========
+
+startshape r
+rule r {}
+
+---
+
+(source_file
+  (shape
+    (identifier)
+  )
+  (rule
+    (identifier)
+  )
+)
+
+
+==========
+One circle
+==========
+
+startshape r
+rule r {
+  circle {
+    1 1
+  }
+}
+
+---
+
+(source_file
+  (shape
+    (identifier)
+  )
+  (rule
+    (identifier)
+    (built_in_rule
+      (body
+        (argument
+          (number)
+        )
+        (argument
+          (number)
+        )
+      )
+    )
+  )
+)
