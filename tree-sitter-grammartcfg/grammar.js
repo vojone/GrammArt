@@ -10,8 +10,59 @@
 module.exports = grammar({
   name: "grammartcfg",
 
+  word: $ => $.identifier,
+
   rules: {
-    // TODO: add the actual grammar rules
-    source_file: $ => "hello"
+    source_file: $ => seq(
+      $.shape,
+      repeat($.rule),
+    ),
+
+    shape: $ => seq(
+      "startshape",
+      field("entry_point", $.identifier),
+    ),
+
+    rule: $ => seq(
+      "rule",
+      field("name", $.identifier),
+      optional($.rule_weight),
+      "{",
+      repeat(
+        $.built_in_rule,
+      ),
+      "}",
+    ),
+
+    rule_weight: $ => $.number,
+
+    built_in_rule: $ => seq(
+      field("type",
+        choice(
+          "square",
+          "circle",
+        ),
+      ),
+      field("body", $.body),
+    ),
+
+    body: $ => seq(
+      "{",
+      field("arguments",
+        repeat(
+          $.argument
+        ),
+      ),
+      "}",
+    ),
+
+    argument: $ => seq(
+      field("name", optional($.identifier)),
+      field("value", $.number),
+    ),
+
+    identifier: $ => /[a-zA-Z][a-zA-Z0-9]*/,
+
+    number: $ => /[+-]?([0-9]+\.?[0-9]*|\.[0-9]+)/,
   }
 });
