@@ -15,7 +15,7 @@ module.exports = grammar({
   rules: {
     source_file: $ => seq(
       $.shape,
-      repeat($.rule),
+      repeat($.rule_decl),
     ),
 
     shape: $ => seq(
@@ -23,7 +23,7 @@ module.exports = grammar({
       field("entry_point", $.identifier),
     ),
 
-    rule: $ => seq(
+    rule_decl: $ => seq(
       "rule",
       field("name", $.identifier),
       optional($.rule_weight),
