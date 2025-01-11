@@ -13,9 +13,11 @@ module.exports = grammar({
   word: $ => $.identifier,
 
   rules: {
-    source_file: $ => seq(
-      $.shape,
-      repeat($.rule_decl),
+    source_file: $ => optional(
+      seq(
+        $.shape,
+        repeat($.rule_decl),
+      )
     ),
 
     shape: $ => seq(
@@ -31,16 +33,18 @@ module.exports = grammar({
       ),
       "{",
       optional(
-        field("body",
-          repeat1(
-            choice(
-              $.terminal,
-              $.non_terminal,
-            )
-          )
-        )
+        field("body", $.rule_decl_body),
       ),
       "}",
+    ),
+
+    rule_decl_body: $ => repeat1(
+      field("symbol",
+        choice(
+          $.terminal,
+          $.non_terminal,
+        )
+      )
     ),
 
     rule_weight: $ => $.number,
@@ -51,13 +55,13 @@ module.exports = grammar({
     ),
 
     terminal: $ => seq(
-      field("type",
-        choice(
-          "square",
-          "circle",
-        ),
-      ),
+      field("type", $.terminal_type),
       field("arguments", $.arguments),
+    ),
+
+    terminal_type: $ => choice(
+      "square",
+      "circle",
     ),
 
     arguments: $ => seq(
