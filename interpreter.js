@@ -19,7 +19,7 @@ class NonTerminal extends MSymbol {
     "size" : validateNumber,
   }
 
-  constructor(id, cx = 0, cy = 0, csize = 0) {
+  constructor(id, cx = 0, cy = 0, csize = 1) {
     super();
     this.id = id;
     this.cx = cx;
@@ -48,7 +48,7 @@ class Terminal extends MSymbol {
 class Square extends Terminal {
   static ARG_ORDER = [...Terminal.ARG_ORDER, "size", "color"]
 
-  ARGS = Object.assign(Terminal.ARGS, {
+  static ARGS = Object.assign(Terminal.ARGS, {
     "size" : validateNumber,
     "color" : acceptAllStrings,
   })
@@ -62,14 +62,12 @@ class Square extends Terminal {
 
 
 class Circle extends Terminal {
-  ARG_ORDER = ["x", "y", "size", "color"]
+  static ARG_ORDER = [...Terminal.ARG_ORDER, "size", "color"]
 
-  ARGS = {
-    "x" : validateNumber,
-    "y" : validateNumber,
+  static ARGS = Object.assign(Terminal.ARGS, {
     "size" : validateNumber,
     "color" : acceptAllStrings,
-  }
+  })
 
   constructor(x = 0, y = 0, size = 1, color = "black") {
     super(x, y);
@@ -127,7 +125,7 @@ class Grammar {
   }
 
   normalizeRules() {
-    for (const [_name, ruleList] of Object.entries(args)) {
+    for (const [_name, ruleList] of Object.entries(this.rules)) {
       let totalWeight = ruleList.reduce((acc, ruleObj) => acc + ruleObj.weight, 0);
       ruleList.forEach(ruleObj => { ruleObj.weight /= totalWeight; });
 
@@ -172,7 +170,8 @@ class Grammar {
 
 
 class SymbolCtx {
-  constructor(x, y, size, color) {
+  constructor(x, y, size, color, rule = null) {
+    this.rule = rule;
     this.x = x;
     this.y = y;
     this.size = size;
@@ -182,8 +181,78 @@ class SymbolCtx {
 
 
 class Interpreter {
-  constructor() {
-    this.ctx = SymbolCtx(0, 0, 1, 0x000000);
+  constructor(initialCtx, canvasElement) {
+    this.initialCtx = initialCtx;
+    this.contextsQueue = [];
     this.grammar = null;
+    this.canvasElement = canvasElement;
+    this.canvasElementCtx = canvasElement[0].getContext("2d");
+    if(this.canvasElementCtx === null) {
+      throw new Error("Unable to get context of canvas!");
+    }
+  }
+
+  setGrammar(grammar) {
+    this.grammar = grammar;
+  }
+
+  execute() {
+    this.init();
+    requestAnimationFrame(() => {this.makeStepUntilEnd();});
+  }
+
+  init() {
+    this.grammar.normalizeRules();
+
+    const initialRule = this.grammar.pickNext(this.grammar.entryPoint);
+    this.initialCtx.rule = initialRule;
+    this.contextsQueue.push(this.initialCtx);
+  }
+
+  makeStepUntilEnd(_time) {
+    let finished = this.makeStep();
+    if(!finished) {
+      requestAnimationFrame(() => {this.makeStepUntilEnd();});
+    }
+  }
+
+  makeStep() {
+    if(this.contextsQueue.length == 0) {
+      return true;
+    }
+
+    const currentCtx = this.contextsQueue.shift();
+    currentCtx.rule.descendants.forEach(child => {
+      switch (child.constructor) {
+        case NonTerminal:
+          const newRule = this.grammar.pickNext(child.id);
+          const x = currentCtx.x + child.cx;
+          const y = currentCtx.y + child.cy;
+          const size = currentCtx.size * child.csize;
+          const color = child.color;
+          let newCtx = new SymbolCtx(x, y, size, color, newRule);
+          this.contextsQueue.push(newCtx);
+          break;
+
+        case Square:
+          this.drawSquare(currentCtx, child);
+          break;
+
+        default:
+          break;
+      }
+    });
+
+    return false;
+  }
+
+  drawSquare(ctx, squareObject) {
+    let size = ctx.size * squareObject.size;
+    let x = ctx.x + squareObject.x - size * 0.5;
+    let y = ctx.y + squareObject.y - size * 0.5;
+    let color = squareObject.color;
+
+    this.canvasElementCtx.fillStyle = color;
+    this.canvasElementCtx.fillRect(x, y, size, size);
   }
 }
