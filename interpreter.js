@@ -1,5 +1,13 @@
 class MSymbol {
+  static ARG_ORDER = []
+
+  static ARGS = {}
+
   constructor() {}
+
+  hasArg(name) {
+    return Object.hasOwn(this.ARGS, name);
+  }
 }
 
 class NonTerminal extends MSymbol {
@@ -14,15 +22,54 @@ class NonTerminal extends MSymbol {
 
 
 class Terminal extends MSymbol {
-  constructor(type, x, y, size, color) {
+  static ARG_ORDER = ["x", "y"]
+
+  static ARGS = {
+    "x" : validateNumber,
+    "y" : validateNumber,
+  }
+
+  constructor(x, y) {
     super();
-    this.type = type;
     this.x = x;
     this.y = y;
+  }
+}
+
+
+class Square extends Terminal {
+  static ARG_ORDER = [...Terminal.ARG_ORDER, "size", "color"]
+
+  ARGS = Object.assign(Terminal.ARGS, {
+    "size" : validateNumber,
+    "color" : acceptAllStrings,
+  })
+
+  constructor(x, y, size, color) {
+    super(x, y);
     this.size = size;
     this.color = color;
   }
 }
+
+
+class Circle extends Terminal {
+  ARG_ORDER = ["x", "y", "size", "color"]
+
+  ARGS = {
+    "x" : validateNumber,
+    "y" : validateNumber,
+    "size" : validateNumber,
+    "color" : acceptAllStrings,
+  }
+
+  constructor(x, y, size, color) {
+    super(x, y);
+    this.size = size;
+    this.color = color;
+  }
+}
+
 
 
 class Rule {
@@ -72,7 +119,7 @@ class Grammar {
   }
 
   normalizeRules() {
-    Object.entries(this.rules).forEach(([_name, ruleList]) => {
+    for (const [_name, ruleList] of Object.entries(args)) {
       let totalWeight = ruleList.reduce((acc, ruleObj) => acc + ruleObj.weight, 0);
       ruleList.forEach(ruleObj => { ruleObj.weight /= totalWeight; });
 
@@ -84,7 +131,7 @@ class Grammar {
         ruleObj.cweight = cWeight;
         cWeight += ruleObj.weight;
       });
-    });
+    };
 
     this.rulesAreNormalized = true;
   }

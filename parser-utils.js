@@ -50,3 +50,14 @@ function getFloatByFieldName(node, name, defval = null) {
 
   return floatVal;
 }
+
+
+function validateNumber(n) {
+  let result = parseFloat(n);
+  return isNaN(result) ? null : result;
+}
+
+
+function acceptAllStrings(s) {
+  return s;
+}

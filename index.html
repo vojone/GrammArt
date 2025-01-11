@@ -9,11 +9,19 @@
 <body>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.14.1/jquery-ui.min.js"></script>
-    <canvas id="main-canvas" height="500" width="500"></canvas>
-    <div id="code-editor" class="code" spellcheck="false" contenteditable>startshape r rule r { <span class="hght">circle</span> { 1 1 } }</div>
-    <button id="b1">Highlight</button>
-    <button id="b3">Compile</button>
-    <button id="b2">Clear highlighting</button>
+    <div id="canvas-window" style="width: 70vw; position: absolute; right: 0;">
+        <canvas id="main-canvas" height="500" width="500"></canvas>
+    </div>
+    <div id="code-window" style="width: 30vw; position: absolute; left: 0;">
+        <div style="height: 300px;">
+            <div id="code-editor" class="code" spellcheck="false" contenteditable>startshape r rule r { <span class="hght">circle</span> { 1 1 } }</div>
+        </div>
+        <div>
+            <button id="b1">Highlight</button>
+            <button id="b3">Compile</button>
+            <button id="b2">Clear highlighting</button>
+        </div>
+    </div>
     <script src="deps/tree-sitter.js"></script>
     <script src="parser-utils.js"></script>
     <script src="interpreter.js"></script>
