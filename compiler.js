@@ -34,7 +34,7 @@ class Compiler extends Traverser {
               descendants.push(Compiler.compileTerminal(symbol));
             }
             else if(symbol.type == "non_terminal") {
-
+              descendants.push(Compiler.compileNonTerminal(symbol));
             }
           });
         }
@@ -53,6 +53,18 @@ class Compiler extends Traverser {
   static compileTerminal(terminalNode) {
     let type = getStringByFieldName(terminalNode, "type");
     let argumentsNode = getChildByFieldName(terminalNode, "arguments");
+    let [unnamedArgs, namedArgs] = Compiler.compileArguments(argumentsNode);
+    return Compiler.createTerminal(type, unnamedArgs, namedArgs);
+  }
+
+  static compileNonTerminal(terminalNode) {
+    let name = getStringByFieldName(terminalNode, "name");
+    let argumentsNode = getChildByFieldName(terminalNode, "arguments");
+    let [unnamedArgs, namedArgs] = Compiler.compileArguments(argumentsNode);
+    return Compiler.createNonTerminal(name, unnamedArgs, namedArgs);
+  }
+
+  static compileArguments(argumentsNode) {
     let args = argumentsNode.childrenForFieldName("arg");
 
     let unnamedArgs = [];
@@ -73,89 +85,96 @@ class Compiler extends Traverser {
       }
     });
 
-    return Compiler.createTerminal(type, unnamedArgs, namedArgs);
+    return [unnamedArgs, namedArgs];
   }
 
   static createTerminal(type, unnamedArgs, namedArgs) {
-    function _processUnnamedArgs(terminalCls, args) {
-      if (terminalCls.ARGS.length < args.length) {
-        throw new Error(`Too many arguments for terminal ${type}`);
-      }
-
-      let result = {};
-      for (let index = 0; index < args.length; index++) {
-        const argStr = args[index];
-        const argName = terminalCls.ARG_ORDER[index];
-
-        if(!Object.hasOwn(terminalCls.ARGS, argName)) {
-          throw new Error(`Internal error! Unknown argument '${argName}'!`);
-        }
-
-        const argVal = terminalCls.ARGS[argName](argStr);
-        if(argVal === null) {
-          throw new Error(`Cannot parse value ${argStr}!`);
-        }
-
-        result[argName] = argVal;
-      }
-
-      return result;
-    }
-
-    function _processNamedArgs(terminalCls, args) {
-      let result = {};
-      for (const [key, value] of Object.entries(args)) {
-        if(!Object.hasOwn(terminalCls.ARGS, key)) {
-          throw new Error(`Internal error! Unknown argument '${key}'!`);
-        }
-
-        const argVal = terminalCls.ARGS[key](value);
-        if(argVal === null) {
-          throw new Error(`Cannot parse value ${value}!`);
-        }
-
-        result[argName] = argVal;
-      }
-
-      return result;
-    }
-
-    function _checkCollisions(args1, args2) {
-      for (const [key, _] of Object.entries(args1)) {
-        if(Object.hasOwn(args2, key)) {
-          throw new Error(`${key} already defined!`);
-        }
-      }
-    }
-
-    function _mergeArgs(args1, args2) {
-      return Object.assign(args1, args2);
-    }
-
-    function _createArgArray(terminalCls, args) {
-      let result = [];
-      terminalCls.ARG_ORDER.forEach(argName => {
-        result.push(args[argName]);
-      });
-
-      return result;
-    }
-
+    let typeCls = null;
     switch (type) {
       case "square":
-        var pUnnamed = _processUnnamedArgs(Square, unnamedArgs);
-        var pNamed = _processNamedArgs(Square, namedArgs);
-        var merged = _mergeArgs(pUnnamed, pNamed);
-        return new Square(..._createArgArray(Square, merged));
-
+        typeCls = Square;
+        break;
       case "circle":
-        var pUnnamed = _processUnnamedArgs(Circle, unnamedArgs);
-        var pNamed = _processNamedArgs(Circle, namedArgs);
-        var merged = _mergeArgs(pUnnamed, pNamed);
-        return new Circle(..._createArgArray(Circle, merged));
-
+        typeCls = Circle;
+        break;
       default:
         throw new Error("Unsupported terminal type!");
     }
+
+    const pUnnamed = Compiler._processUnnamedArgs(typeCls, unnamedArgs);
+    const pNamed = Compiler._processNamedArgs(typeCls, namedArgs);
+    const merged = Compiler._mergeArgs(pUnnamed, pNamed);
+    return new typeCls(...Compiler._createArgArray(typeCls, merged));
+  }
+
+  static createNonTerminal(id, unnamedArgs, namedArgs) {
+    const pUnnamed = Compiler._processUnnamedArgs(NonTerminal, unnamedArgs);
+    const pNamed = Compiler._processNamedArgs(NonTerminal, namedArgs);
+    const merged = Compiler._mergeArgs(pUnnamed, pNamed);
+    return new NonTerminal(id, ...Compiler._createArgArray(NonTerminal, merged));
+  }
+
+  static _processUnnamedArgs(smybolCls, args) {
+    if (smybolCls.ARGS.length < args.length) {
+      throw new Error(`Too many arguments for terminal ${type}`);
+    }
+
+    let result = {};
+    for (let index = 0; index < args.length; index++) {
+      const argStr = args[index];
+      const argName = smybolCls.ARG_ORDER[index];
+
+      if(!Object.hasOwn(smybolCls.ARGS, argName)) {
+        throw new Error(`Internal error! Unknown argument '${argName}'!`);
+      }
+
+      const argVal = smybolCls.ARGS[argName](argStr);
+      if(argVal === null) {
+        throw new Error(`Cannot parse value ${argStr}!`);
+      }
+
+      result[argName] = argVal;
+    }
+
+    return result;
+  }
+
+  static _processNamedArgs(smybolCls, args) {
+    let result = {};
+    for (const [key, value] of Object.entries(args)) {
+      if(!Object.hasOwn(smybolCls.ARGS, key)) {
+        throw new Error(`Internal error! Unknown argument '${key}'!`);
+      }
+
+      const argVal = smybolCls.ARGS[key](value);
+      if(argVal === null) {
+        throw new Error(`Cannot parse value ${value}!`);
+      }
+
+      result[argName] = argVal;
+    }
+
+    return result;
+  }
+
+  static _checkCollisions(args1, args2) {
+    for (const [key, _] of Object.entries(args1)) {
+      if(Object.hasOwn(args2, key)) {
+        throw new Error(`${key} already defined!`);
+      }
+    }
+  }
+
+  static _mergeArgs(args1, args2) {
+    return Object.assign(args1, args2);
+  }
+
+  static _createArgArray(smybolCls, args) {
+    let result = [];
+    smybolCls.ARG_ORDER.forEach(argName => {
+      result.push(args[argName]);
+    });
+
+    return result;
   }
 }

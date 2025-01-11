@@ -11,7 +11,15 @@ class MSymbol {
 }
 
 class NonTerminal extends MSymbol {
-  constructor(id, cx, cy, csize) {
+  static ARG_ORDER = ["x", "y", "size"]
+
+  static ARGS = {
+    "x" : validateNumber,
+    "y" : validateNumber,
+    "size" : validateNumber,
+  }
+
+  constructor(id, cx = 0, cy = 0, csize = 0) {
     super();
     this.id = id;
     this.cx = cx;
@@ -45,7 +53,7 @@ class Square extends Terminal {
     "color" : acceptAllStrings,
   })
 
-  constructor(x, y, size, color) {
+  constructor(x = 0, y = 0, size = 1, color = "black") {
     super(x, y);
     this.size = size;
     this.color = color;
@@ -63,7 +71,7 @@ class Circle extends Terminal {
     "color" : acceptAllStrings,
   }
 
-  constructor(x, y, size, color) {
+  constructor(x = 0, y = 0, size = 1, color = "black") {
     super(x, y);
     this.size = size;
     this.color = color;
