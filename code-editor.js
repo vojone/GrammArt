@@ -5,9 +5,7 @@ class Formatter {
 
   purifyString() {
     let str = $(this.editorElement).html();
-    console.log(str);
     str = str.replaceAll("&nbsp;", " ").replaceAll("<br>", "\n");
-    console.log(str);
     return str;
   }
 
@@ -76,10 +74,9 @@ class ClosingTag extends FormatTag {
 
 
 class Linter extends Traverser {
-  constructor(cls, editorElement) {
+  constructor(cls) {
     super();
     this.cls = cls;
-    this.editorElement = editorElement;
   }
 
   lint(tree, text) {
@@ -120,9 +117,8 @@ class Highlighter {
     new TokenClass(this.KEYWORD, "kw"),
   ]
 
-  constructor(cls, editorElement) {
+  constructor(cls) {
     this.cls = cls;
-    this.editorElement = editorElement;
   }
 
   highlight(text) {

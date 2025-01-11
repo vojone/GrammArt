@@ -19,6 +19,7 @@ async function main(params) {
   let highlighter = new Highlighter("hght", $("#code-editor"));
   let linter = new Linter("lnt", $("#code-editor"));
   let formatter = new Formatter($("#code-editor"));
+  let compiler = new Compiler();
 
   $("#b1").click(() => {
     formatter.clearFormatting();
@@ -28,6 +29,12 @@ async function main(params) {
     let fmt = [...highlighter.highlight(code), ...linter.lint(tree, code)];
     sortedFmt = fmt.sort(FormatTag.sort);
     formatter.format(sortedFmt, code);
+  });
+  $("#b3").click(() => {
+    formatter.clearFormatting();
+    let code = formatter.purifyString();
+    const tree = parser.parse(code);
+    console.log(compiler.compile(tree, code));
   });
   $("#b2").click(() => {
 
