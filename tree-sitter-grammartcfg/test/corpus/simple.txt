@@ -11,7 +11,7 @@ rule r {}
   (shape
     (identifier)
   )
-  (rule
+  (rule_decl
     (identifier)
   )
 )
@@ -34,10 +34,10 @@ rule r {
   (shape
     (identifier)
   )
-  (rule
+  (rule_decl
     (identifier)
-    (built_in_rule
-      (body
+    (terminal
+      (arguments
         (argument
           (number)
         )

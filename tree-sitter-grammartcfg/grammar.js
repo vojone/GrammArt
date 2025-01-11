@@ -26,29 +26,43 @@ module.exports = grammar({
     rule_decl: $ => seq(
       "rule",
       field("name", $.identifier),
-      optional($.rule_weight),
+      optional(
+        field("weight", $.rule_weight)
+      ),
       "{",
-      repeat(
-        $.built_in_rule,
+      optional(
+        field("body",
+          repeat1(
+            choice(
+              $.terminal,
+              $.non_terminal,
+            )
+          )
+        )
       ),
       "}",
     ),
 
     rule_weight: $ => $.number,
 
-    built_in_rule: $ => seq(
+    non_terminal: $ => seq(
+      field("name", $.identifier),
+      field("arguments", $.arguments),
+    ),
+
+    terminal: $ => seq(
       field("type",
         choice(
           "square",
           "circle",
         ),
       ),
-      field("body", $.body),
+      field("arguments", $.arguments),
     ),
 
-    body: $ => seq(
+    arguments: $ => seq(
       "{",
-      field("arguments",
+      field("arg",
         repeat(
           $.argument
         ),
