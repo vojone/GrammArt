@@ -1,10 +1,48 @@
-class Rule {
-  constructor(descendants = [], cx, cy, csize, weight) {
-    this.descendants = descendants;
+class MSymbol {
+  constructor() {}
+}
+
+class NonTerminal extends MSymbol {
+  constructor(id, cx, cy, csize) {
+    super();
+    this.id = id;
     this.cx = cx;
     this.cy = cy;
     this.csize = csize;
+  }
+}
+
+
+class Terminal extends MSymbol {
+  constructor(type, x, y, size, color) {
+    super();
+    this.type = type;
+    this.x = x;
+    this.y = y;
+    this.size = size;
+    this.color = color;
+  }
+}
+
+
+class Rule {
+  constructor(name, descendants = [], weight = 1) {
+    this.name = name;
+    this.descendants = descendants;
     this.weight = weight;
+    this.cweight = null;
+  }
+
+  pushDescendant(descendant) {
+    this.descendants.push(descendant);
+  }
+
+  setCWeight(val) {
+    this.cweight = val;
+  }
+
+  isEmpty() {
+    return descendant.length == 0;
   }
 }
 
@@ -12,6 +50,7 @@ class Rule {
 class Grammar {
   constructor(rules = {}, entryPoint = null, options = {}) {
     this.rules = rules;
+    this.rulesAreNormalized = false;
     this.entryPoint = entryPoint;
     this.options = options;
   }
@@ -20,20 +59,64 @@ class Grammar {
     return Object.hasOwn(this.rules, name);
   }
 
-  addRule(name, rule) {
+  addNewRule(name, rule) {
+    this.rulesAreNormalized = false;
     if(this.hasRule(name)) {
       this.rules.push(rule);
       return true;
     }
     else {
-      this.rules[name] = [rule];
+      this.rules[name] = Array(rule);
       return false;
     }
+  }
+
+  normalizeRules() {
+    Object.entries(this.rules).forEach(([_name, ruleList]) => {
+      let totalWeight = ruleList.reduce((acc, ruleObj) => acc + ruleObj.weight, 0);
+      ruleList.forEach(ruleObj => { ruleObj.weight /= totalWeight; });
+
+      ruleList.sort((r1, r2) => r1.weight - r2.weight );
+
+      // Conversion to cummulative weight
+      let cWeight = 0;
+      ruleList.forEach(ruleObj => {
+        ruleObj.cweight = cWeight;
+        cWeight += ruleObj.weight;
+      });
+    });
+
+    this.rulesAreNormalized = true;
+  }
+
+  pickNext(name) {
+    if(!this.rulesAreNormalized) {
+      throw new Error("Internal error! Rules have to be normalized!");
+    }
+    if(!this.hasRule(name)) {
+      throw new Error(`Rule ${name} is not defined!`);
+    }
+
+    // Random roullete algorithm
+    let r = Math.random();
+    let selected = null;
+    for (let index = 0; selected === null && index < this.rules[name]; index++) {
+      const rule = this.rules[name][index];
+      selected = rule.cweight > r ? rule : null;
+    }
+
+    // Because there may be problem with approximation errors -> pick the last one
+    // if nothing was selected
+    if(selected === null) {
+      selected = this.rules[name][this.rules[name].length - 1];
+    }
+
+    return selected;
   }
 }
 
 
-class InterpreterCtx {
+class SymbolCtx {
   constructor(x, y, size, color) {
     this.x = x;
     this.y = y;
@@ -45,7 +128,7 @@ class InterpreterCtx {
 
 class Interpreter {
   constructor() {
-    this.ctx = InterpreterCtx(0, 0, 1, 0x000000);
+    this.ctx = SymbolCtx(0, 0, 1, 0x000000);
     this.grammar = null;
   }
 }

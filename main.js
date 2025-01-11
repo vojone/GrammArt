@@ -43,6 +43,6 @@ async function main(params) {
   $("#code-editor").on("click", () => {
     let editor = $("#code-editor");
     let editorContent = editor.text();
-    console.log(document.getSelection());
+    //console.log(document.getSelection());
   });
 }
