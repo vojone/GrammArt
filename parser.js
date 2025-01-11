@@ -1,9 +1,5 @@
 class Traverser {
-  constructor(tree) {
-    self.tree = tree
-  }
-
-  inorder(processNodeCb, ctx) {
+  inorder(tree, processNodeCb, ctx) {
     let cursor = tree.rootNode.walk();
     let finished = false;
 

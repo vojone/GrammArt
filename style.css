@@ -1,3 +1,37 @@
 #main-canvas {
     border: 1px solid black;
 }
+
+
+.code {
+    font-size: 1.1rem;
+    font-family: 'Courier New', Courier, monospace;
+    display: inline-block;
+    white-space: pre;
+}
+
+
+.code span.err {
+    text-decoration-line: underline;
+    text-decoration-style: wavy;
+    text-decoration-color: red;
+}
+
+.code span.err span.kw, .code span.err span.num, .code span.err span.id {
+    color: black;
+    font-weight: normal;
+}
+
+.code span.kw {
+    color: rgb(41, 41, 255);
+    font-weight: normal;
+}
+
+.code span.num {
+    color: rgb(244, 103, 0);
+}
+
+.code span.id {
+    color: rgb(0, 168, 168);
+    font-weight: bold;
+}

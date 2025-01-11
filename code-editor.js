@@ -3,22 +3,39 @@ class Formatter {
     this.editorElement = editorElement;
   }
 
-  format(formatMarkers) {
-    let text = $(this.editorElement).text();
+  purifyString() {
+    let str = $(this.editorElement).html();
+    console.log(str);
+    str = str.replaceAll("&nbsp;", " ").replaceAll("<br>", "\n");
+    console.log(str);
+    return str;
+  }
+
+  format(formatMarkers, text) {
     let indexOffset = 0;
     formatMarkers.forEach(fmt => {
       let tagString = fmt.toString();
       text = text.slice(0, fmt.index + indexOffset) + tagString + text.slice(fmt.index + indexOffset);
       indexOffset += tagString.length;
     });
+
+    //text = text.replaceAll(/\n|\r\n/g, "<br>");
     $(this.editorElement).html(text);
   }
 
   clearFormatting() {
-    let tags = $(this.editorElement).find("span.hght, span.lnt");
-    tags.each((_i, e) => {
-      $(e).replaceWith($(e).html());
-    });
+    let finished = false;
+    while (!finished) {
+      let tags = $(this.editorElement).find("span.hght, span.lnt");
+      if(tags.length == 0) {
+        finished = true;
+      }
+      else {
+        tags.each((_i, e) => {
+          $(e).replaceWith($(e).html());
+        });
+      }
+    }
   }
 }
 
@@ -29,7 +46,7 @@ class FormatTag {
   }
 
   static sort(f1, f2) {
-    return f1.index > f2.index;
+    return f1.index - f2.index;
   }
 }
 
@@ -42,7 +59,7 @@ class OpeningTag extends FormatTag {
   }
 
   toString() {
-    return `<span class="${this.htmlClassName}" title="${this.title}">`;
+    return `<span class="${this.htmlClassName}">`;
   }
 }
 
@@ -59,23 +76,22 @@ class ClosingTag extends FormatTag {
 
 
 class Linter extends Traverser {
-  constructor(tree, cls, editorElement) {
-    super(tree);
+  constructor(cls, editorElement) {
+    super();
     this.cls = cls;
     this.editorElement = editorElement;
   }
 
-  lint() {
-    let text = $(this.editorElement).text();
-    console.log(text);
+  lint(tree, text) {
     let formatMarkers = [];
-    this.inorder(this.processNode, { "text": text, "formatMarkers": formatMarkers });
+    this.inorder(tree, this.processNode, { "text": text, "formatMarkers": formatMarkers, "cls" : this.cls });
     return formatMarkers;
   }
 
   processNode(node, ctx) {
+    let clsName = ctx.cls;
     if(node.type == "ERROR") {
-      ctx.formatMarkers.push(new OpeningTag(node.startIndex, `${this.cls} err`, "Syntax error"));
+      ctx.formatMarkers.push(new OpeningTag(node.startIndex, `${clsName} err`, "Syntax error"));
       ctx.formatMarkers.push(new ClosingTag(node.endIndex));
     }
   }
@@ -83,9 +99,10 @@ class Linter extends Traverser {
 
 
 class TokenClass {
-  constructor(regex, htmlClassName) {
+  constructor(regex, htmlClassName, isKeywordclass = false) {
     this.regex = regex;
     this.htmlClassName = htmlClassName;
+    this.isKeywordclass = isKeywordclass;
   }
 }
 
@@ -108,17 +125,16 @@ class Highlighter {
     this.editorElement = editorElement;
   }
 
-  highlight() {
-    let text = $(this.editorElement).text();
+  highlight(text) {
     let formatMarkers = [];
     let match = null;
-    this.TOKEN_TYPES.forEach(tokenType => {
+    let clsName = this.cls;
+    this.TOKEN_TYPES.forEach((tokenType) => {
       while ((match = tokenType.regex.exec(text)) !== null) {
-        formatMarkers.push(new OpeningTag(match.index, `${this.cls} ${tokenType.htmlClassName}`));
+        formatMarkers.push(new OpeningTag(match.index, `${clsName} ${tokenType.htmlClassName}`));
         formatMarkers.push(new ClosingTag(match.index + match[0].length));
       }
     });
-
     return formatMarkers;
   }
 }
