@@ -115,7 +115,7 @@ class Grammar {
   addNewRule(name, rule) {
     this.rulesAreNormalized = false;
     if(this.hasRule(name)) {
-      this.rules.push(rule);
+      this.rules[name].push(rule);
       return true;
     }
     else {
@@ -127,16 +127,20 @@ class Grammar {
   normalizeRules() {
     for (const [_name, ruleList] of Object.entries(this.rules)) {
       let totalWeight = ruleList.reduce((acc, ruleObj) => acc + ruleObj.weight, 0);
-      ruleList.forEach(ruleObj => { ruleObj.weight /= totalWeight; });
-
-      ruleList.sort((r1, r2) => r1.weight - r2.weight );
+      ruleList.sort((r1, r2) => r2.weight - r1.weight );
 
       // Conversion to cummulative weight
       let cWeight = 0;
-      ruleList.forEach(ruleObj => {
-        ruleObj.cweight = cWeight;
-        cWeight += ruleObj.weight;
-      });
+      for (let index = 0; index < ruleList.length; index++) {
+        let ruleObj = ruleList[index];
+        if (index + 1 == ruleList.length) {
+          ruleObj.cweight = 1.0;
+        }
+        else {
+          cWeight += ruleObj.weight;
+          ruleObj.cweight = cWeight / totalWeight;
+        }
+      }
     };
 
     this.rulesAreNormalized = true;
@@ -153,9 +157,9 @@ class Grammar {
     // Random roullete algorithm
     let r = Math.random();
     let selected = null;
-    for (let index = 0; selected === null && index < this.rules[name]; index++) {
+    for (let index = 0; selected === null && index < this.rules[name].length; index++) {
       const rule = this.rules[name][index];
-      selected = rule.cweight > r ? rule : null;
+      selected = r <= rule.cweight ? rule : null;
     }
 
     // Because there may be problem with approximation errors -> pick the last one
@@ -169,13 +173,20 @@ class Grammar {
 }
 
 
-class SymbolCtx {
-  constructor(x, y, size, color, rule = null) {
-    this.rule = rule;
+class InitialCtx {
+  constructor(x, y, size, color) {
     this.x = x;
     this.y = y;
     this.size = size;
     this.color = color;
+  }
+}
+
+
+class SymbolCtx extends InitialCtx {
+  constructor(rule, x = 0, y = 0, size = 1, color = "black") {
+    super(x, y, size, color);
+    this.rule = rule;
   }
 }
 
@@ -185,7 +196,7 @@ class Interpreter {
     this.initialCtx = initialCtx;
     this.contextsQueue = [];
     this.grammar = null;
-    this.canvasElement = canvasElement;
+    this.canvasElement = canvasElement[0];
     this.canvasElementCtx = canvasElement[0].getContext("2d");
     if(this.canvasElementCtx === null) {
       throw new Error("Unable to get context of canvas!");
@@ -201,12 +212,16 @@ class Interpreter {
     requestAnimationFrame(() => {this.makeStepUntilEnd();});
   }
 
+  reset() {
+    this.contextsQueue = [];
+  }
+
   init() {
     this.grammar.normalizeRules();
 
     const initialRule = this.grammar.pickNext(this.grammar.entryPoint);
-    this.initialCtx.rule = initialRule;
-    this.contextsQueue.push(this.initialCtx);
+    let ctx = Object.assign(new SymbolCtx(initialRule), this.initialCtx);
+    this.contextsQueue.push(ctx);
   }
 
   makeStepUntilEnd(_time) {
@@ -230,7 +245,7 @@ class Interpreter {
           const y = currentCtx.y + child.cy;
           const size = currentCtx.size * child.csize;
           const color = child.color;
-          let newCtx = new SymbolCtx(x, y, size, color, newRule);
+          let newCtx = new SymbolCtx(newRule, x, y, size, color);
           this.contextsQueue.push(newCtx);
           break;
 
@@ -254,5 +269,9 @@ class Interpreter {
 
     this.canvasElementCtx.fillStyle = color;
     this.canvasElementCtx.fillRect(x, y, size, size);
+  }
+
+  clear() {
+    this.canvasElementCtx.clearRect(0, 0, this.canvasElement.width,  this.canvasElement.height);
   }
 }

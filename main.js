@@ -20,7 +20,7 @@ async function main(params) {
   let linter = new Linter("lnt", $("#code-editor"));
   let formatter = new Formatter($("#code-editor"));
   let compiler = new Compiler();
-  let interpreter = new Interpreter(new SymbolCtx(250, 250, 10, "black"), $("#main-canvas"));
+  let interpreter = new Interpreter(new InitialCtx(250, 250, 10, "black"), $("#main-canvas"));
 
   $("#b1").click(() => {
     formatter.clearFormatting();
@@ -41,6 +41,8 @@ async function main(params) {
     //interpreter.drawSquare(new SymbolCtx(0, 0, 1, "black"), new Square(0, 0, 40, "black"));
     formatter.clearFormatting();
     let code = formatter.purifyString();
+    interpreter.reset();
+    interpreter.clear();
     const tree = parser.parse(code);
     const grammar = compiler.compile(tree, code);
     interpreter.setGrammar(grammar);
