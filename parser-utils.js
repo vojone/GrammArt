@@ -18,6 +18,12 @@ class Traverser {
         if(cursor.gotoNextSibling()) {
           break;
         }
+
+        toParentResult = cursor.gotoParent();
+      }
+
+      if(!toParentResult) {
+        finished = true;
       }
     }
 
