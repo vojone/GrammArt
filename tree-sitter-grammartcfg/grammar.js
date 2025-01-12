@@ -12,6 +12,11 @@ module.exports = grammar({
 
   word: $ => $.identifier,
 
+  extras: $ => [
+    $.comment,
+    /[\s]/,
+  ],
+
   rules: {
     source_file: $ => optional(
       seq(
@@ -79,8 +84,16 @@ module.exports = grammar({
       field("value", $.number),
     ),
 
-    identifier: $ => /[a-zA-Z][a-zA-Z0-9]*/,
+    identifier: _ => /[a-zA-Z][a-zA-Z0-9]*/,
 
-    number: $ => /[+-]?([0-9]+\.?[0-9]*|\.[0-9]+)/,
+    number: _ => /[+-]?([0-9]+\.?[0-9]*|\.[0-9]+)/,
+
+    // http://stackoverflow.com/questions/13014947/regex-to-match-a-c-style-multiline-comment/36328890#36328890
+    comment: _ => token(
+      choice(
+        /\/\/[^\r\n\u2028\u2029]*/,
+        /\/\*[^*]*\*+([^/*][^*]*\*+)*\//,
+      )
+    ),
   }
 });

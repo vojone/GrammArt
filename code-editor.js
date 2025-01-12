@@ -153,6 +153,10 @@ class Highlighter extends Traverser {
         Formatter.formatNode(ctx, nameNode, "id");
         break;
 
+      case "comment":
+        Formatter.formatNode(ctx, node, "comment");
+        break;
+
       case "startshape":
       case "rule":
       case "square":

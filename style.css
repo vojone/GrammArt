@@ -34,6 +34,10 @@
     color: rgb(0, 168, 168);
 }
 
+.code span.comment {
+    color: rgb(124, 196, 163);
+}
+
 .code span.argn {
     color: rgb(122, 122, 122);
 }
