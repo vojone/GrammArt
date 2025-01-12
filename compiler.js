@@ -151,7 +151,7 @@ class Compiler extends Traverser {
         throw new Error(`Cannot parse value ${value}!`);
       }
 
-      result[argName] = argVal;
+      result[key] = argVal;
     }
 
     return result;
