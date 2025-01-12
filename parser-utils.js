@@ -13,13 +13,10 @@ class Traverser {
       }
       while(cursor.gotoNextSibling());
 
-      while(cursor.gotoParent()) {
+      let toParentResult = cursor.gotoParent();
+      while(toParentResult) {
         if(cursor.gotoNextSibling()) {
-          finished = false;
           break;
-        }
-        else {
-          finished = true;
         }
       }
     }
