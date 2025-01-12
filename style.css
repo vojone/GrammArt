@@ -24,7 +24,6 @@
 
 .code span.kw {
     color: rgb(41, 41, 255);
-    font-weight: normal;
 }
 
 .code span.num {
@@ -33,5 +32,12 @@
 
 .code span.id {
     color: rgb(0, 168, 168);
+}
+
+.code span.argn {
+    color: rgb(122, 122, 122);
+}
+
+.code span.b {
     font-weight: bold;
 }

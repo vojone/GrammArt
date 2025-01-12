@@ -27,7 +27,7 @@ async function main(params) {
     let code = formatter.purifyString();
     const tree = parser.parse(code);
 
-    let fmt = [...highlighter.highlight(code), ...linter.lint(tree, code)];
+    let fmt = [...highlighter.highlight(tree, code), ...linter.lint(tree, code)];
     sortedFmt = fmt.sort(FormatTag.sort);
     formatter.format(sortedFmt, code);
   });

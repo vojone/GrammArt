@@ -3,6 +3,15 @@ class Formatter {
     this.editorElement = editorElement;
   }
 
+  static formatNode(ctx, node, className, title = "") {
+    if(node === null) {
+      return;
+    }
+
+    ctx.formatMarkers.push(new OpeningTag(node.startIndex, `${ctx.cls} ${className}`, title));
+    ctx.formatMarkers.push(new ClosingTag(node.endIndex));
+  }
+
   purifyString() {
     let str = $(this.editorElement).html();
     str = str.replaceAll("&nbsp;", " ").replaceAll("<br>", "\n");
@@ -86,11 +95,8 @@ class Linter extends Traverser {
   }
 
   processNode(node, ctx) {
-    let clsName = ctx.cls;
-    if(node.type == "ERROR") {
-      ctx.formatMarkers.push(new OpeningTag(node.startIndex, `${clsName} err`, "Syntax error"));
-      ctx.formatMarkers.push(new ClosingTag(node.endIndex));
-    }
+    // TODO semantic checks
+    return true;
   }
 }
 
@@ -104,33 +110,60 @@ class TokenClass {
 }
 
 
-class Highlighter {
-  KEYWORD = /startshape|rule|square|circle/g
-
-  IDENTIFIER = /[a-zA-Z][a-zA-Z0-9]*/g
-
-  NUMBER = /[+-]?([0-9]+\.?[0-9]*|\.[0-9]+)/g
-
-  TOKEN_TYPES = [
-    new TokenClass(this.IDENTIFIER, "id"),
-    new TokenClass(this.NUMBER, "num"),
-    new TokenClass(this.KEYWORD, "kw"),
-  ]
-
+class Highlighter extends Traverser {
   constructor(cls) {
+    super();
     this.cls = cls;
   }
 
-  highlight(text) {
+  highlight(tree, text) {
     let formatMarkers = [];
-    let match = null;
-    let clsName = this.cls;
-    this.TOKEN_TYPES.forEach((tokenType) => {
-      while ((match = tokenType.regex.exec(text)) !== null) {
-        formatMarkers.push(new OpeningTag(match.index, `${clsName} ${tokenType.htmlClassName}`));
-        formatMarkers.push(new ClosingTag(match.index + match[0].length));
-      }
-    });
+    this.inorder(tree, this.processNode, { "text": text, "formatMarkers": formatMarkers, "cls" : this.cls });
     return formatMarkers;
+  }
+
+  processNode(node, ctx) {
+    let skipDescendants = false;
+    switch (node.type) {
+      case "ERROR":
+        console.log(node.toString());
+        Formatter.formatNode(ctx, node, "err", "Syntax error");
+        break;
+
+      case "shape":
+        var entryNode = node.childForFieldName("entry_point");
+        Formatter.formatNode(ctx, entryNode, "id");
+        break;
+
+      case "rule_decl":
+        var nameNode = node.childForFieldName("name");
+        Formatter.formatNode(ctx, nameNode, "id b");
+        break;
+
+      case "argument":
+        var nameNode = node.childForFieldName("name");
+        Formatter.formatNode(ctx, nameNode, "argn");
+        var valNode = node.childForFieldName("value");
+        Formatter.formatNode(ctx, valNode, "num");
+        skipDescendants = true;
+        break;
+
+      case "non_terminal":
+        var nameNode = node.childForFieldName("name");
+        Formatter.formatNode(ctx, nameNode, "id");
+        break;
+
+      case "startshape":
+      case "rule":
+      case "square":
+      case "circle":
+        Formatter.formatNode(ctx, node, "kw");
+        break;
+
+      default:
+        break;
+    }
+
+    return skipDescendants;
   }
 }
