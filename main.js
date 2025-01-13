@@ -7,13 +7,21 @@ delete WebAssembly.instantiateStreaming;
 const Parser = window.TreeSitter;
 
 (async() => {
-  await Parser.init()
+  if(typeof TREE_SITTER_WASM === "undefined" || TREE_SITTER_WASM === null) {
+    await Parser.init();
+  }
+  else {
+    await Parser.init({"wasmBinary" : TREE_SITTER_WASM});
+  }
   await main();
 })();
 
 async function main(params) {
   const parser = new Parser();
-  const CFGLanguageGrammar = await Parser.Language.load('tree-sitter-grammartcfg/tree-sitter-grammartcfg.wasm');
+  const languagePath = "tree-sitter-grammartcfg/tree-sitter-grammartcfg.wasm";
+  const language = (typeof TREE_SITTER_CFG_WASM === 'undefined' || TREE_SITTER_CFG_WASM === null) ? languagePath : TREE_SITTER_CFG_WASM;
+  console.log(language);
+  const CFGLanguageGrammar = await Parser.Language.load(language);
   parser.setLanguage(CFGLanguageGrammar);
 
   let highlighter = new Highlighter("hght", $("#code-editor"));
