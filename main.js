@@ -28,7 +28,7 @@ async function main(params) {
   let linter = new Linter("lnt", $("#code-editor"));
   let formatter = new Formatter($("#code-editor"));
   let compiler = new Compiler();
-  let interpreter = new Interpreter(new InitialCtx(250, 250, 10, "black"), $("#main-canvas"));
+  let interpreter = new Interpreter(new InitialCtx(250, 250, 10, "black", 0), $("#main-canvas"));
 
   $("#b1").click(() => {
     formatter.clearFormatting();

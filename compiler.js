@@ -139,14 +139,14 @@ class Compiler extends Traverser {
     return result;
   }
 
-  static _processNamedArgs(smybolCls, args) {
+  static _processNamedArgs(symbolCls, args) {
     let result = {};
     for (const [key, value] of Object.entries(args)) {
-      if(!Object.hasOwn(smybolCls.ARGS, key)) {
+      if(!Object.hasOwn(symbolCls.ARGS, key)) {
         throw new Error(`Internal error! Unknown argument '${key}'!`);
       }
 
-      const argVal = smybolCls.ARGS[key](value);
+      const argVal = symbolCls.ARGS[key](value);
       if(argVal === null) {
         throw new Error(`Cannot parse value ${value}!`);
       }

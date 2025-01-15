@@ -11,20 +11,22 @@ class MSymbol {
 }
 
 class NonTerminal extends MSymbol {
-  static ARG_ORDER = ["x", "y", "size"]
+  static ARG_ORDER = ["x", "y", "s", "r"]
 
   static ARGS = {
     "x" : validateNumber,
     "y" : validateNumber,
-    "size" : validateNumber,
+    "s" : validateNumber,
+    "r" : validateNumber,
   }
 
-  constructor(id, cx = 0, cy = 0, csize = 1) {
+  constructor(id, cx = 0, cy = 0, csize = 1, r = 0) {
     super();
     this.id = id;
     this.cx = cx;
     this.cy = cy;
     this.csize = csize;
+    this.r = r;
   }
 }
 
@@ -46,33 +48,37 @@ class Terminal extends MSymbol {
 
 
 class Square extends Terminal {
-  static ARG_ORDER = [...Terminal.ARG_ORDER, "size", "color"]
+  static ARG_ORDER = [...Terminal.ARG_ORDER, "s", "c", "r"]
 
   static ARGS = Object.assign(Terminal.ARGS, {
-    "size" : validateNumber,
+    "s" : validateNumber,
     "color" : acceptAllStrings,
+    "r": validateNumber,
   })
 
-  constructor(x = 0, y = 0, size = 1, color = "black") {
+  constructor(x = 0, y = 0, size = 1, color = "black", r = 0) {
     super(x, y);
     this.size = size;
     this.color = color;
+    this.r = r
   }
 }
 
 
 class Circle extends Terminal {
-  static ARG_ORDER = [...Terminal.ARG_ORDER, "size", "color"]
+  static ARG_ORDER = [...Terminal.ARG_ORDER, "s", "c", "r"]
 
   static ARGS = Object.assign(Terminal.ARGS, {
     "size" : validateNumber,
     "color" : acceptAllStrings,
+    "r": validateNumber,
   })
 
-  constructor(x = 0, y = 0, size = 1, color = "black") {
+  constructor(x = 0, y = 0, size = 1, color = "black", r = 0) {
     super(x, y);
     this.size = size;
     this.color = color;
+    this.r = r;
   }
 }
 
@@ -174,18 +180,19 @@ class Grammar {
 
 
 class InitialCtx {
-  constructor(x, y, size, color) {
+  constructor(x, y, size, color, r) {
     this.x = x;
     this.y = y;
     this.size = size;
     this.color = color;
+    this.r = r;
   }
 }
 
 
 class SymbolCtx extends InitialCtx {
-  constructor(rule, x = 0, y = 0, size = 1, color = "black") {
-    super(x, y, size, color);
+  constructor(rule, x = 0, y = 0, size = 1, color = "black", r = 0) {
+    super(x, y, size, color, r);
     this.rule = rule;
   }
 }
@@ -202,6 +209,21 @@ class Interpreter {
       throw new Error("Unable to get context of canvas!");
     }
   }
+
+  static deg2Rads(deg) {
+    return (Math.PI / 180) * deg;
+  }
+
+  static rotateCoordinates(x, y, rad, origX = 0, origY = 0) {
+    let tX = x - origX;
+    let tY = y - origY;
+    let rX = tX * Math.cos(rad) - tY * Math.sin(rad);
+    let rY = tX * Math.sin(rad) + tY * Math.cos(rad);
+    let fX = rX + origX;
+    let fY = rY + origY;
+
+    return [fX, fY];
+}
 
   setGrammar(grammar) {
     this.grammar = grammar;
@@ -241,11 +263,15 @@ class Interpreter {
       switch (child.constructor) {
         case NonTerminal:
           const newRule = this.grammar.pickNext(child.id);
-          const x = currentCtx.x + child.cx;
-          const y = currentCtx.y + child.cy;
+
+          const r = currentCtx.r + child.r;
+          let rads = Interpreter.deg2Rads(r);
+          let [rotX, rotY] = Interpreter.rotateCoordinates(child.cx, child.cy, rads);
+          const x = currentCtx.x + rotX;
+          const y = currentCtx.y + rotY;
           const size = currentCtx.size * child.csize;
           const color = child.color;
-          let newCtx = new SymbolCtx(newRule, x, y, size, color);
+          let newCtx = new SymbolCtx(newRule, x, y, size, color, r);
           this.contextsQueue.push(newCtx);
           break;
 
@@ -263,12 +289,28 @@ class Interpreter {
 
   drawSquare(ctx, squareObject) {
     let size = ctx.size * squareObject.size;
-    let x = ctx.x + squareObject.x - size * 0.5;
-    let y = ctx.y + squareObject.y - size * 0.5;
+
+    let r = ctx.r + squareObject.r;
+    let rads = Interpreter.deg2Rads(r);
+    let [rotX, rotY] = Interpreter.rotateCoordinates(squareObject.x, squareObject.y, rads);
+    let cornerX = ctx.x + rotX;
+    let cornerY = ctx.y + rotY;
+    let x = cornerX - size * 0.5;
+    let y = cornerY - size * 0.5;
     let color = squareObject.color;
+
+    this.canvasElementCtx.save();
+
+    // Rotate just square itself
+    this.canvasElementCtx.translate(cornerX, cornerY);
+    this.canvasElementCtx.rotate(rads);
+    this.canvasElementCtx.translate(-cornerX, -cornerY);
 
     this.canvasElementCtx.fillStyle = color;
     this.canvasElementCtx.fillRect(x, y, size, size);
+
+    this.canvasElementCtx.restore();
+
   }
 
   clear() {
