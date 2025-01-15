@@ -3,13 +3,13 @@ class Formatter {
     this.editorElement = editorElement;
   }
 
-  static formatNode(ctx, node, className, title = "") {
+  static formatNode(ctx, node, className, title = "", offsetStart = 0, offsetEnd = 0) {
     if(node === null) {
       return;
     }
 
-    ctx.formatMarkers.push(new OpeningTag(node.startIndex, `${ctx.cls} ${className}`, title));
-    ctx.formatMarkers.push(new ClosingTag(node.endIndex));
+    ctx.formatMarkers.push(new OpeningTag(node.startIndex + offsetStart, `${ctx.cls} ${className}`, title));
+    ctx.formatMarkers.push(new ClosingTag(node.endIndex + offsetEnd));
   }
 
   purifyString() {
@@ -66,7 +66,7 @@ class OpeningTag extends FormatTag {
   }
 
   toString() {
-    return `<span class="${this.htmlClassName}">`;
+    return `<span class="${this.htmlClassName}" title="${this.title}">`;
   }
 }
 
@@ -95,7 +95,8 @@ class Linter extends Traverser {
   }
 
   processNode(node, ctx) {
-    // TODO semantic checks
+    console.log(node.type);
+    console.log(node);
     return true;
   }
 }
@@ -124,9 +125,13 @@ class Highlighter extends Traverser {
 
   processNode(node, ctx) {
     let skipDescendants = false;
+    if(node.isMissing) {
+      Formatter.formatNode(ctx, node, "err", `Missing ${node.type}`, -1);
+      return skipDescendants;
+    }
+
     switch (node.type) {
       case "ERROR":
-        console.log(node.toString());
         Formatter.formatNode(ctx, node, "err", "Syntax error");
         break;
 
