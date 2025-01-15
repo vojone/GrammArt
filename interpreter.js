@@ -279,6 +279,10 @@ class Interpreter {
           this.drawSquare(currentCtx, child);
           break;
 
+        case Circle:
+          this.drawCircle(currentCtx, child);
+          break;
+
         default:
           break;
       }
@@ -301,7 +305,6 @@ class Interpreter {
 
     this.canvasElementCtx.save();
 
-    // Rotate just square itself
     this.canvasElementCtx.translate(cornerX, cornerY);
     this.canvasElementCtx.rotate(rads);
     this.canvasElementCtx.translate(-cornerX, -cornerY);
@@ -310,7 +313,24 @@ class Interpreter {
     this.canvasElementCtx.fillRect(x, y, size, size);
 
     this.canvasElementCtx.restore();
+  }
 
+  drawCircle(ctx, squareObject) {
+    let size = ctx.size * squareObject.size;
+
+    let r = ctx.r + squareObject.r;
+    let rads = Interpreter.deg2Rads(r);
+    let [rotX, rotY] = Interpreter.rotateCoordinates(squareObject.x, squareObject.y, rads);
+    let cornerX = ctx.x + rotX;
+    let cornerY = ctx.y + rotY;
+    let x = cornerX;
+    let y = cornerY;
+    let color = squareObject.color;
+
+    this.canvasElementCtx.fillStyle = color;
+    this.canvasElementCtx.beginPath();
+    this.canvasElementCtx.arc(x, y, size * 0.5, 0, 2 * Math.PI);
+    this.canvasElementCtx.fill();
   }
 
   clear() {
