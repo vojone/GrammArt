@@ -3,13 +3,22 @@
 }
 
 
+.lineno {
+    font-size: 1.1rem;
+    font-family: monospace;
+    background-color: gray;
+}
+
 .code {
     font-size: 1.1rem;
     font-family: 'Courier New', Courier, monospace;
     display: inline-block;
-    white-space: pre;
+    white-space: pre-wrap;
 }
 
+.code::selection, .code span::selection {
+    background: rgba(35, 156, 255, 0.4);
+}
 
 .code span.err {
     text-decoration-line: underline;
@@ -35,7 +44,7 @@
 }
 
 .code span.comment {
-    color: rgb(124, 196, 163);
+    color: rgb(115, 196, 159);
 }
 
 .code span.argn {

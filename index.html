@@ -14,9 +14,13 @@
     </div>
     <div id="code-window" style="width: 30vw; position: absolute; left: 0;">
         <div style="height: 300px;">
-            <div id="code-editor" class="code" spellcheck="false" contenteditable>startshape r
-rule r { square { 0 0 } la { x 0 y 10 r 20 } }
-rule la 0.7 { square { 0 0 } }
+            <div id="line-numbering" style="width: 1rem; position: absolute; left: 0; font-size: 1.1rem;"></div>
+            <div style="width: calc(30vw - 1.1rem); position: absolute; left: 1.1rem;">
+                <div id="code-editor" class="code" spellcheck="false" contenteditable>startshape r
+rule r { square { 1 1 } a { x 1 y 1 } }
+rule a 0.7 { square { 10 10 } a { 10 10 } }
+rule a 0.4 {}
+rule a 0.3 {}</div>
             </div>
         </div>
         <div>
