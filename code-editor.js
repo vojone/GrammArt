@@ -12,12 +12,6 @@ class Formatter {
     ctx.formatMarkers.push(new ClosingTag(node.endIndex + offsetEnd));
   }
 
-  purifyString() {
-    let str = $(this.editorElement).html();
-    str = str.replaceAll("&nbsp;", " ").replaceAll("<br>", "\n");
-    return str;
-  }
-
   format(formatMarkers, text) {
     let indexOffset = 0;
     formatMarkers.forEach(fmt => {
@@ -26,8 +20,7 @@ class Formatter {
       indexOffset += tagString.length;
     });
 
-    //text = text.replaceAll(/\n|\r\n/g, "<br>");
-    $(this.editorElement).html(text);
+    return text;
   }
 
   clearFormatting() {
@@ -94,6 +87,7 @@ class Linter extends Traverser {
     return formatMarkers;
   }
 
+  // Language specific function
   processNode(node, ctx) {
     console.log(node.type);
     console.log(node);
@@ -123,6 +117,7 @@ class Highlighter extends Traverser {
     return formatMarkers;
   }
 
+  // Language specific function
   processNode(node, ctx) {
     let skipDescendants = false;
     if(node.isMissing) {
@@ -174,5 +169,203 @@ class Highlighter extends Traverser {
     }
 
     return skipDescendants;
+  }
+}
+
+
+class CodeEditor {
+  static NEWLINE_REGEXP = /(\r?\n)/g;
+
+  constructor(editorJQElement, lineNumbersJQElement, parser) {
+    this.editor = editorJQElement;
+    this.lineNumbers = lineNumbersJQElement;
+    this.origLineNumber = null;
+    this.cursorOffset = 0;
+    this.highlighter = new Highlighter("hght", editorJQElement);
+    this.linter = new Linter("lnt", editorJQElement);
+    this.formatter = new Formatter(editorJQElement);
+    this.parser = parser;
+  }
+
+  init() {
+    this.editor[0].addEventListener("beforeinput", (e) => {
+      if(e.inputType == "deleteContentBackward") {
+        this._storeCursor(e);
+        if(window.getSelection().getRangeAt(0).collapsed) {
+          this.cursorOffset -= 1;
+        }
+      }
+
+      this._updateNumbering(e);
+    });
+
+    this.editor[0].addEventListener("input", (e) => {
+      if(e.inputType !== "deleteContentBackward") {
+        this._storeCursor(e);
+      }
+
+      this.formatCode();
+      this._restoreCursor();
+    });
+
+    this.initNumbering();
+    this.formatCode();
+  }
+
+  formatCode() {
+    this.formatter.clearFormatting();
+    const code = this.editor.html().replaceAll("&nbsp;", " ").replaceAll("<br>", "\n");
+    const tree = this.parser.parse(code);
+
+    const fmt = [...this.highlighter.highlight(tree, code) ];
+
+    const sortedFmt = fmt.sort(FormatTag.sort);
+    const formatted = this.formatter.format(sortedFmt, code);
+
+    this.editor.html(formatted);
+  }
+
+  clearFormatting() {
+    this.formatter.clearFormatting();
+  }
+
+  _restoreCursor() {
+    this.putCursorToOffset(this.cursorOffset);
+  }
+
+
+  _storeCursor(_e) {
+    let range = window.getSelection().getRangeAt(0);
+    this.cursorOffset = this.getOffsetInEditor(range.startContainer, range.startOffset);
+  }
+
+  getCode() {
+    return this.editor.text();
+  }
+
+  initNumbering() {
+    const originalText = this.editor.text();
+    const originalNewlines = originalText.matchAll(CodeEditor.NEWLINE_REGEXP).toArray();
+    this.origLineNumber = originalNewlines.length;
+    this.setLineNumbering(this.origLineNumber);
+  }
+
+  _updateNumbering(e) {
+    var extraNewlines = 0;
+    var insertedText = "";
+
+    if(this.origLineNumber === null) {
+      const originalText = this.editor.text();
+      const originalNewlines = originalText.matchAll(CodeEditor.NEWLINE_REGEXP).toArray();
+      extraNewlines = originalNewlines.length;
+      this.origLineNumber = 0;
+    }
+
+    let startOffset = this.getOffsetInEditor(
+      e.getTargetRanges()[0].startContainer,
+      e.getTargetRanges()[0].startOffset,
+    );
+    let endOffset = this.getOffsetInEditor(
+      e.getTargetRanges()[0].endContainer,
+      e.getTargetRanges()[0].endOffset,
+    );
+
+    let affectedText = this.editor.text().substring(startOffset, endOffset);
+    const deletedNewlines = affectedText.matchAll(CodeEditor.NEWLINE_REGEXP).toArray();
+    extraNewlines -= deletedNewlines.length;
+    if(e.inputType == "insertFromPaste") {
+      e.dataTransfer.items[0].getAsString((data) => {
+        const pastedTextRegexp = /<!--StartFragment-->(.*)<!--EndFragment-->/gsi;
+        const pastedText = data.match(pastedTextRegexp);
+        const pastedNewlines = pastedText[0].matchAll(CodeEditor.NEWLINE_REGEXP).toArray();
+        extraNewlines += pastedNewlines.length;
+
+        if(extraNewlines != 0) {
+          this.setLineNumbering(this.origLineNumber + extraNewlines);
+        }
+
+        this.editor[0].normalize();
+      });
+
+      return;
+    }
+    else if(e.inputType == "insertParagraph") {
+      insertedText = "\n";
+    }
+    else if(e.inputType == "insertText") {
+      insertedText = e.data;
+    }
+
+    const newNewlines = insertedText.matchAll(CodeEditor.NEWLINE_REGEXP).toArray();
+    extraNewlines += newNewlines.length;
+    if(extraNewlines != 0) {
+      this.setLineNumbering(this.origLineNumber + extraNewlines);
+    }
+  }
+
+  setLineNumbering(lineNumber) {
+    this.lineNumbers.html("");
+    for (let line = 0; line <= lineNumber; line++) {
+      this.lineNumbers.append(`<div id="l${line}" class="lineno">${line + 1}</div>`)
+    }
+
+    this.origLineNumber = lineNumber;
+  }
+
+  getOffsetInEditor(node, initialOffset) {
+    let offset = initialOffset;
+    let editorElement = this.editor[0];
+    while(node != editorElement) {
+      let parentNode = node.parentNode;
+      let childNode = parentNode.firstChild;
+      while(childNode != node) {
+        if(childNode.nodeType == Node.TEXT_NODE) {
+          offset += childNode.length;
+        }
+        else {
+          offset += childNode.innerText.length;
+        }
+
+        childNode = childNode.nextSibling;
+      }
+
+      node = parentNode;
+    }
+
+    return offset;
+  }
+
+  putCursorToOffset(_offset) {
+    function findNodeOnOffset(node, offset) {
+      if(node.nodeType == Node.TEXT_NODE && node.length >= offset) {
+        return [node, offset];
+      }
+
+      let cNode = node.firstChild;
+      while(cNode !== null) {
+        let nodeTextLength = cNode.nodeType == Node.TEXT_NODE ? cNode.length : cNode.innerText.length;
+        if(offset <= nodeTextLength) {
+          return findNodeOnOffset(cNode, offset);
+        }
+        else {
+          offset -= nodeTextLength;
+        }
+
+        cNode = cNode.nextSibling;
+      }
+
+      return [null, null];
+    }
+
+    let editorElement = this.editor[0];
+    let [node, offset] = findNodeOnOffset(editorElement, _offset);
+
+    let range = document.createRange();
+    let curSelection = window.getSelection();
+    range.setStart(node, offset);
+    range.setEnd(node, offset);
+    range.collapse(true);
+    curSelection.removeAllRanges();
+    curSelection.addRange(range);
   }
 }
