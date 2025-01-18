@@ -206,9 +206,9 @@ class CodeEditor {
         }
       }
 
-      if(!this.isChrome) {
-        this._updateNumbering(e);
-      }
+      // if(!this.isChrome) {
+      //   this._updateNumbering(e);
+      // }
     });
 
     this.editor[0].addEventListener("input", (e) => {
@@ -216,10 +216,7 @@ class CodeEditor {
         this._storeCursor(e);
       }
 
-      if(e.inputType == "insertFromPaste" || this.isChrome) {
-        this.initNumbering();
-      }
-
+      this.initNumbering();
       this.formatCode();
       this._restoreCursor();
     });
