@@ -176,18 +176,28 @@ class Highlighter extends Traverser {
 class CodeEditor {
   static NEWLINE_REGEXP = /(\r?\n)/g;
 
-  constructor(editorJQElement, lineNumbersJQElement, parser) {
-    this.editor = editorJQElement;
-    this.lineNumbers = lineNumbersJQElement;
+  constructor(editor, lineNumbers, parser) {
+    this.editor = editor;
+    this.lineNumbers = lineNumbers;
     this.origLineNumber = null;
     this.cursorOffset = 0;
-    this.highlighter = new Highlighter("hght", editorJQElement);
-    this.linter = new Linter("lnt", editorJQElement);
-    this.formatter = new Formatter(editorJQElement);
+    this.highlighter = new Highlighter("hght", editor);
+    this.linter = new Linter("lnt", editor);
+    this.formatter = new Formatter(editor);
     this.parser = parser;
+
+    let userAgentString = navigator.userAgent;
+    this.isChrome = userAgentString.indexOf("Chrome") > -1;
   }
 
   init() {
+    if(this.isChrome) {
+      this.editor.prop("contentEditable", "plaintext-only");
+    }
+
+    this.initNumbering();
+    this.formatCode();
+
     this.editor[0].addEventListener("beforeinput", (e) => {
       if(e.inputType == "deleteContentBackward") {
         this._storeCursor(e);
@@ -196,7 +206,9 @@ class CodeEditor {
         }
       }
 
-      this._updateNumbering(e);
+      if(!this.isChrome) {
+        this._updateNumbering(e);
+      }
     });
 
     this.editor[0].addEventListener("input", (e) => {
@@ -204,12 +216,13 @@ class CodeEditor {
         this._storeCursor(e);
       }
 
+      if(e.inputType == "insertFromPaste" || this.isChrome) {
+        this.initNumbering();
+      }
+
       this.formatCode();
       this._restoreCursor();
     });
-
-    this.initNumbering();
-    this.formatCode();
   }
 
   formatCode() {
@@ -251,6 +264,10 @@ class CodeEditor {
   }
 
   _updateNumbering(e) {
+    if(e.inputType == "insertFromPaste") {
+      return; // It is hadnled in input event to be sure that any newline do not disappear
+    }
+
     var extraNewlines = 0;
     var insertedText = "";
 
@@ -261,35 +278,23 @@ class CodeEditor {
       this.origLineNumber = 0;
     }
 
-    let startOffset = this.getOffsetInEditor(
-      e.getTargetRanges()[0].startContainer,
-      e.getTargetRanges()[0].startOffset,
-    );
-    let endOffset = this.getOffsetInEditor(
-      e.getTargetRanges()[0].endContainer,
-      e.getTargetRanges()[0].endOffset,
-    );
+    let targetRanges = e.getTargetRanges();
+    if(targetRanges.length > 0) {
+      let startOffset = this.getOffsetInEditor(
+        e.getTargetRanges()[0].startContainer,
+        e.getTargetRanges()[0].startOffset,
+      );
+      let endOffset = this.getOffsetInEditor(
+        e.getTargetRanges()[0].endContainer,
+        e.getTargetRanges()[0].endOffset,
+      );
 
-    let affectedText = this.editor.text().substring(startOffset, endOffset);
-    const deletedNewlines = affectedText.matchAll(CodeEditor.NEWLINE_REGEXP).toArray();
-    extraNewlines -= deletedNewlines.length;
-    if(e.inputType == "insertFromPaste") {
-      e.dataTransfer.items[0].getAsString((data) => {
-        const pastedTextRegexp = /<!--StartFragment-->(.*)<!--EndFragment-->/gsi;
-        const pastedText = data.match(pastedTextRegexp);
-        const pastedNewlines = pastedText[0].matchAll(CodeEditor.NEWLINE_REGEXP).toArray();
-        extraNewlines += pastedNewlines.length;
-
-        if(extraNewlines != 0) {
-          this.setLineNumbering(this.origLineNumber + extraNewlines);
-        }
-
-        this.editor[0].normalize();
-      });
-
-      return;
+      let affectedText = this.editor.text().substring(startOffset, endOffset);
+      const deletedNewlines = affectedText.matchAll(CodeEditor.NEWLINE_REGEXP).toArray();
+      extraNewlines -= deletedNewlines.length;
     }
-    else if(e.inputType == "insertParagraph") {
+
+    if(e.inputType == "insertParagraph") {
       insertedText = "\n";
     }
     else if(e.inputType == "insertText") {
