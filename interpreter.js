@@ -267,9 +267,9 @@ class Interpreter {
           const r = currentCtx.r + child.r;
           let rads = Interpreter.deg2Rads(r);
           let [rotX, rotY] = Interpreter.rotateCoordinates(child.cx, child.cy, rads);
-          const x = currentCtx.x + rotX;
-          const y = currentCtx.y + rotY;
           const size = currentCtx.size * child.csize;
+          const x = currentCtx.x + rotX * size;
+          const y = currentCtx.y + rotY * size;
           const color = child.color;
           let newCtx = new SymbolCtx(newRule, x, y, size, color, r);
           this.contextsQueue.push(newCtx);
@@ -297,8 +297,8 @@ class Interpreter {
     let r = ctx.r + squareObject.r;
     let rads = Interpreter.deg2Rads(r);
     let [rotX, rotY] = Interpreter.rotateCoordinates(squareObject.x, squareObject.y, rads);
-    let cornerX = ctx.x + rotX;
-    let cornerY = ctx.y + rotY;
+    let cornerX = ctx.x + rotX * size;
+    let cornerY = ctx.y + rotY * size;
     let x = cornerX - size * 0.5;
     let y = cornerY - size * 0.5;
     let color = squareObject.color;
@@ -321,8 +321,8 @@ class Interpreter {
     let r = ctx.r + squareObject.r;
     let rads = Interpreter.deg2Rads(r);
     let [rotX, rotY] = Interpreter.rotateCoordinates(squareObject.x, squareObject.y, rads);
-    let cornerX = ctx.x + rotX;
-    let cornerY = ctx.y + rotY;
+    let cornerX = ctx.x + rotX * size;
+    let cornerY = ctx.y + rotY * size;
     let x = cornerX;
     let y = cornerY;
     let color = squareObject.color;
