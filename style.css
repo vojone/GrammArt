@@ -15,11 +15,11 @@
 
 #code-window {
     min-width: 500px;
+    max-width: 40vw;
 }
 
 #code-window #code-editor-wrapper {
     width: 100%;
-    max-width: 40vw;
     max-height: 90vh;
     overflow: auto;
     display: flex;
@@ -31,6 +31,7 @@
 
 @media (max-width: 1000px) {
     #code-window {
+        max-width: none;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -39,7 +40,6 @@
 
     #code-window #code-editor-wrapper {
         justify-content: center;
-        max-width: none;
         max-height: 60vh;
     }
 }
