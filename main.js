@@ -50,4 +50,8 @@ async function main(params) {
     interpreter.execute();
     document.getElementById("code-editor").normalize();
   });
+
+  $("#canvas-download").click(() => {
+    downloadCanvasContent("main-canvas", "result", 500, 500);
+  });
 }
