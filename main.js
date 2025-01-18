@@ -21,7 +21,6 @@ async function main(params) {
   const parser = new Parser();
   const languagePath = "tree-sitter-grammartcfg/tree-sitter-grammartcfg.wasm";
   const language = (typeof TREE_SITTER_CFG_WASM === 'undefined' || TREE_SITTER_CFG_WASM === null) ? languagePath : TREE_SITTER_CFG_WASM;
-  console.log(language);
   const CFGLanguageGrammar = await Parser.Language.load(language);
   parser.setLanguage(CFGLanguageGrammar);
 
