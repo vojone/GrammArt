@@ -176,6 +176,8 @@ class Highlighter extends Traverser {
 class CodeEditor {
   static NEWLINE_REGEXP = /(\r?\n)/g;
 
+  MAX_REVISIONS = 20
+
   constructor(editor, lineNumbers, parser) {
     this.editor = editor;
     this.lineNumbers = lineNumbers;
@@ -185,6 +187,8 @@ class CodeEditor {
     this.linter = new Linter("lnt", editor);
     this.formatter = new Formatter(editor);
     this.parser = parser;
+    this.previousRevisions = [];
+    this.previousCursors = [];
 
     let userAgentString = navigator.userAgent;
     this.isChrome = userAgentString.indexOf("Chrome") > -1;
@@ -199,6 +203,8 @@ class CodeEditor {
     this.formatCode();
 
     this.editor[0].addEventListener("beforeinput", (e) => {
+      this.saveRevision();
+
       if(e.inputType == "deleteContentBackward") {
         this._storeCursor(e);
         if(window.getSelection().getRangeAt(0).collapsed) {
@@ -206,9 +212,7 @@ class CodeEditor {
         }
       }
 
-      // if(!this.isChrome) {
-      //   this._updateNumbering(e);
-      // }
+      // if(!this.isChrome) { this._updateNumbering(e); }
     });
 
     this.editor[0].addEventListener("input", (e) => {
@@ -220,6 +224,35 @@ class CodeEditor {
       this.formatCode();
       this._restoreCursor();
     });
+
+    this.editor[0].addEventListener("keydown", (e) => {
+      if (e.ctrlKey && e.key == 'z') {
+        e.preventDefault();
+        if(this.previousRevisions.length > 0) {
+          this.editor[0].innerHTML = this.previousRevisions.pop();
+          this.initNumbering();
+          this.formatCode();
+        }
+
+        if(this.previousCursors.length > 0) {
+          this.cursor = this.previousCursors.pop();
+          this.putCursorToOffset(this.cursor);
+        }
+      }
+    });
+  }
+
+  saveRevision() {
+    if(this.previousRevisions.length == this.MAX_REVISIONS) {
+      this.previousRevisions.shift();
+      this.previousCursors.shift();
+    }
+
+    this.previousRevisions.push(this.getCode());
+
+    let range = window.getSelection().getRangeAt(0);
+    this.cursorOffset = this.getOffsetInEditor(range.startContainer, range.startOffset);
+    this.previousCursors.push(this.cursorOffset);
   }
 
   formatCode() {
