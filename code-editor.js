@@ -199,8 +199,8 @@ class CodeEditor {
       this.editor.prop("contentEditable", "plaintext-only");
     }
 
-    this.initNumbering();
     this.formatCode();
+    this.initNumbering();
 
     this.editor[0].addEventListener("beforeinput", (e) => {
       this.saveRevision();
@@ -257,7 +257,12 @@ class CodeEditor {
 
   formatCode() {
     this.formatter.clearFormatting();
-    const code = this.editor.html().replaceAll("&nbsp;", " ").replaceAll("<br>", "\n");
+    let code = this.editor.html().replaceAll("&nbsp;", " ").replaceAll("<br>", "\n");
+
+    if(code.match(/(\n|<br>)$/) == null) {
+      code += "\n\n";
+    }
+
     const tree = this.parser.parse(code);
 
     const fmt = [...this.highlighter.highlight(tree, code) ];
@@ -287,9 +292,13 @@ class CodeEditor {
   }
 
   initNumbering() {
-    const originalText = this.editor.text();
+    const originalText = this.getCode();
     const originalNewlines = originalText.matchAll(CodeEditor.NEWLINE_REGEXP).toArray();
     this.origLineNumber = originalNewlines.length;
+    if(originalText.match(/(\r?\n)$/g) !== null) {
+      this.origLineNumber -= 1;
+    }
+
     this.setLineNumbering(this.origLineNumber);
   }
 
