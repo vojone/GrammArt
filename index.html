@@ -4,29 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <title>GrammarArt</title>
 </head>
 <body>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.14.1/jquery-ui.min.js"></script>
-    <div id="canvas-window" style="width: 70vw; position: absolute; right: 0;">
-        <canvas id="main-canvas" height="500" width="500"></canvas>
-    </div>
-    <div id="code-window" style="width: 30vw; position: absolute; left: 0;">
-        <div style="height: 300px;">
-            <div id="line-numbering" style="width: 1rem; position: absolute; left: 0; font-size: 1.1rem;"></div>
-            <div style="width: calc(30vw - 1.1rem); position: absolute; left: 1.1rem;">
-                <div  id="code-editor" class="code" spellcheck="false" contenteditable>startshape r
+
+    <div class="vh-100">
+        <nav class="navbar navbar-light bg-light">
+            GrammarArt
+        </nav>
+        <div id="content-wrapper" class="d-flex flex-lg-row flex-column-reverse">
+            <div id="code-window" class="flex-fill">
+                <div id="code-editor-wrapper">
+                    <div id="line-numbering"></div>
+                    <div id="code-wrapper">
+                        <div  id="code-editor" class="code" spellcheck="false" contenteditable>startshape r
 rule r { square { 1 1 } a { x 1 y 1 } }
 rule a 0.7 { square { 10 10 } a { 10 10 } }
 rule a 0.4 {}
 rule a 0.3 {}</div>
+                    </div>
+                </div>
+                <div id="code-controls">
+                    <button id="b1">Highlight</button>
+                    <button id="b3">Compile</button>
+                    <button id="b2">Clear highlighting</button>
+                </div>
             </div>
-        </div>
-        <div>
-            <button id="b1">Highlight</button>
-            <button id="b3">Compile</button>
-            <button id="b2">Clear highlighting</button>
+            <div id="canvas-window" class="flex-fill flex-grow-2 d-flex justify-content-center">
+                <canvas id="main-canvas" class="align-self-center" height="500" width="500"></canvas>
+            </div>
         </div>
     </div>
     <!-- <script src="deps/tree-sitter-base64.js"></script> -->
