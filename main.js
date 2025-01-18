@@ -46,11 +46,29 @@ async function main(params) {
     const tree = parser.parse(code);
     const grammar = compiler.compile(tree, code);
     interpreter.setGrammar(grammar);
-    interpreter.execute();
+    interpreter.run();
     document.getElementById("code-editor").normalize();
   });
 
   $("#canvas-download").click(() => {
     downloadCanvasContent("main-canvas", "result", 500, 500);
+  });
+
+  $("#canvas-run").click(() => {
+    interpreter.run();
+  });
+
+  $("#canvas-stop").click(() => {
+    interpreter.stop();
+  });
+
+  $("#canvas-reset").click(() => {
+    interpreter.reset();
+    interpreter.clear();
+  });
+
+  $("#canvas-step").click(() => {
+    interpreter.stop();
+    interpreter.step();
   });
 }

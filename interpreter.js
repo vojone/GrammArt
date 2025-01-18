@@ -205,6 +205,8 @@ class Interpreter {
     this.grammar = null;
     this.canvasElement = canvasElement[0];
     this.canvasElementCtx = canvasElement[0].getContext("2d");
+    this.stopped = false;
+    this.finished = false;
     if(this.canvasElementCtx === null) {
       throw new Error("Unable to get context of canvas!");
     }
@@ -229,12 +231,21 @@ class Interpreter {
     this.grammar = grammar;
   }
 
-  execute() {
-    this.init();
-    requestAnimationFrame(() => {this.makeStepUntilEnd();});
+  run() {
+    this.stopped = false;
+
+    if(!this.finished && this.contextsQueue.length == 0) {
+      this.init();
+    }
+
+    requestAnimationFrame(() => {
+      this.makeStepUntilEnd();
+    });
   }
 
   reset() {
+    this.stopped = false;
+    this.finished = false;
     this.contextsQueue = [];
   }
 
@@ -246,10 +257,28 @@ class Interpreter {
     this.contextsQueue.push(ctx);
   }
 
+  step() {
+    this.stopped = true;
+
+    if(!this.finished && this.contextsQueue.length == 0) {
+      this.init();
+    }
+
+    requestAnimationFrame(() => {
+      this.makeStep();
+    });
+  }
+
+  stop() {
+    this.stopped = true;
+  }
+
   makeStepUntilEnd(_time) {
-    let finished = this.makeStep();
-    if(!finished) {
-      requestAnimationFrame(() => {this.makeStepUntilEnd();});
+    this.finished = this.makeStep();
+    if(!this.finished && !this.stopped) {
+      requestAnimationFrame(() => {
+        this.makeStepUntilEnd();
+      });
     }
   }
 
