@@ -1,6 +1,4 @@
-#content-wrapper {
-    min-height: 75vh;
-}
+/* Additional layout adjustments */
 
 #canvas-window {
     flex-grow: 3 !important;
@@ -10,7 +8,6 @@
 #canvas-window #main-canvas {
     border: 1px solid black;
 }
-
 
 
 #code-window {
@@ -52,6 +49,14 @@
     width: 100%;
 }
 
+#code-window #code-controls {
+    margin-top: auto;
+}
+
+
+
+/* Code editor formatting */
+
 #line-numbering {
     padding: 3px;
     background-color: rgb(209, 209, 209);
@@ -65,6 +70,7 @@
     padding: 0 5px;
 }
 
+
 .code {
     font-size: 1.1rem;
     font-family: 'Courier New', Courier, monospace;
@@ -73,6 +79,7 @@
     padding: 3px;
     background-color: whitesmoke;
 }
+
 
 .code:focus {
     outline: none;

@@ -12,29 +12,35 @@
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.14.1/jquery-ui.min.js"></script>
 
     <div class="vh-100">
-        <nav class="navbar navbar-light bg-light">
-            GrammarArt
-        </nav>
-        <div id="content-wrapper" class="d-flex flex-lg-row flex-column-reverse">
-            <div id="code-window" class="flex-fill">
-                <div id="code-editor-wrapper">
-                    <div id="line-numbering"></div>
-                    <div id="code-wrapper">
-                        <div  id="code-editor" class="code" spellcheck="false" contenteditable>startshape r
-rule r { square { 1 1 } a { x 1 y 1 } }
-rule a 0.7 { square { 10 10 } a { 10 10 } }
-rule a 0.4 {}
-rule a 0.3 {}</div>
+        <div class="d-flex flex-column h-100">
+            <nav class="navbar navbar-light bg-light">
+                GrammarArt
+            </nav>
+            <div id="content-wrapper" class="d-flex flex-lg-row flex-column-reverse flex-fill">
+                <div id="code-window" class="flex-fill d-flex flex-column">
+                    <div id="code-editor-wrapper">
+                        <div id="line-numbering"></div>
+                        <div id="code-wrapper">
+                            <div  id="code-editor" class="code" spellcheck="false" contenteditable>startshape r
+
+rule r { square { 10 0 } a { } }
+rule a 0.7 { square { } a { 1 1 } }</div>
+                        </div>
+                    </div>
+                    <div id="code-controls">
+                        <button id="b1">Highlight</button>
+                        <button id="b3">Compile</button>
+                        <button id="b2">Clear highlighting</button>
                     </div>
                 </div>
-                <div id="code-controls">
-                    <button id="b1">Highlight</button>
-                    <button id="b3">Compile</button>
-                    <button id="b2">Clear highlighting</button>
+                <div id="canvas-window" class="flex-fill flex-grow-2 d-flex justify-content-around  flex-column">
+                        <canvas id="main-canvas" class="align-self-center" height="500" width="500"></canvas>
+                    <div id="canvas-controls" class="d-flex justify-content-center">
+                        <button id="canvas-reset">Reset</button>
+                        <button id="canvas-download">Download</button>
+                        <button id="canvas-pause">Stop</button>
+                    </div>
                 </div>
-            </div>
-            <div id="canvas-window" class="flex-fill flex-grow-2 d-flex justify-content-center">
-                <canvas id="main-canvas" class="align-self-center" height="500" width="500"></canvas>
             </div>
         </div>
     </div>

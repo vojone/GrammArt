@@ -297,8 +297,8 @@ class Interpreter {
     let r = ctx.r + squareObject.r;
     let rads = Interpreter.deg2Rads(r);
     let [rotX, rotY] = Interpreter.rotateCoordinates(squareObject.x, squareObject.y, rads);
-    let cornerX = ctx.x + rotX * size;
-    let cornerY = ctx.y + rotY * size;
+    let cornerX = ctx.x + rotX * ctx.size;
+    let cornerY = ctx.y + rotY * ctx.size;
     let x = cornerX - size * 0.5;
     let y = cornerY - size * 0.5;
     let color = squareObject.color;
@@ -321,8 +321,8 @@ class Interpreter {
     let r = ctx.r + squareObject.r;
     let rads = Interpreter.deg2Rads(r);
     let [rotX, rotY] = Interpreter.rotateCoordinates(squareObject.x, squareObject.y, rads);
-    let cornerX = ctx.x + rotX * size;
-    let cornerY = ctx.y + rotY * size;
+    let cornerX = ctx.x + rotX * ctx.size;
+    let cornerY = ctx.y + rotY * ctx.size;
     let x = cornerX;
     let y = cornerY;
     let color = squareObject.color;
