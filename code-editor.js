@@ -239,6 +239,26 @@ class CodeEditor {
           this.putCursorToOffset(this.cursor);
         }
       }
+      if(e.key === "Tab") {
+        e.preventDefault();
+
+        this.saveRevision();
+
+        const TAB_SEQUENCE = "\t";
+        let sel = window.getSelection();
+        let range = sel.getRangeAt(0);
+        let offset = this.getOffsetInEditor(range.startContainer, range.startOffset);
+        let value = this.editor.text();
+        let newValue = value.substring(0, offset) + TAB_SEQUENCE + value.substring(offset);
+        this.editor.text(newValue);
+        this.putCursorToOffset(offset + TAB_SEQUENCE.length);
+
+        this.cursorOffset = offset + TAB_SEQUENCE.length
+        this.formatCode();
+        this._restoreCursor();
+
+        return false;
+      }
     });
   }
 

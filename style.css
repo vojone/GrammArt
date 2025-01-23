@@ -49,8 +49,9 @@
 }
 
 #code-window #code-wrapper {
+    height: fit-content;
     flex-grow: 1;
-    overflow: auto;
+    overflow-x: auto;
 }
 
 #code-window #code-editor {
@@ -67,6 +68,8 @@
 /* Code editor formatting */
 
 #line-numbering {
+    height: fit-content;
+    min-height: 100%;
     padding: 3px;
     background-color: rgb(209, 209, 209);
     font-size: 1.1rem;
@@ -87,6 +90,7 @@
     white-space: pre;
     padding: 3px;
     background-color: whitesmoke;
+    tab-size: 2;
 }
 
 
