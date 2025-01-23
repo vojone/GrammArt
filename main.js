@@ -6,18 +6,20 @@
 delete WebAssembly.instantiateStreaming;
 const Parser = window.TreeSitter;
 
-(async() => {
-  if(typeof TREE_SITTER_WASM === "undefined" || TREE_SITTER_WASM === null) {
-    await Parser.init();
-  }
-  else {
-    await Parser.init({"wasmBinary" : TREE_SITTER_WASM});
-  }
-  await main();
-})();
+$(document).ready(() => {
+  (async() => {
+    if(typeof TREE_SITTER_WASM === "undefined" || TREE_SITTER_WASM === null) {
+      await Parser.init();
+    }
+    else {
+      await Parser.init({"wasmBinary" : TREE_SITTER_WASM});
+    }
+    await setup();
+  })();
+});
 
-var dbg;
-async function main(params) {
+
+async function setup(params) {
   const parser = new Parser();
   const languagePath = "tree-sitter-grammartcfg/tree-sitter-grammartcfg.wasm";
   const language = (typeof TREE_SITTER_CFG_WASM === 'undefined' || TREE_SITTER_CFG_WASM === null) ? languagePath : TREE_SITTER_CFG_WASM;
@@ -30,24 +32,38 @@ async function main(params) {
   let compiler = new Compiler();
   let interpreter = new Interpreter(new InitialCtx(250, 250, 10, "black", 0), $("#main-canvas"));
 
-  $("#b1").click(() => {
+  $("#code-save").click(() => {
+    let code = codeEditor.getCode();
+    let currentDate = new Date();
+    let currentDateStr = `${padZero(currentDate.getDate())}${padZero(currentDate.getMonth() + 1)}-${padZero(currentDate.getHours())}${padZero(currentDate.getMinutes())}${padZero(currentDate.getSeconds())}`;
+    downloadText(code, `GrammarArt-${currentDateStr}.gcfg`);
+  });
+  $("#code-load").click(() => {
+    loadTextFileInput((code) => {
+      codeEditor.setCode(code);
+    }).click();
+  });
+  $("#code-format").click(() => {
     codeEditor.formatCode();
   });
-  $("#b3").click(() => {
+  $("#code-compile").click(() => {
     let code = codeEditor.getCode();
     const tree = parser.parse(code);
-    console.log(compiler.compile(tree, code));
+    const grammar = compiler.compile(tree, code);
+    console.log(grammar);
+    interpreter.setGrammar(grammar);
   });
-  $("#b2").click(() => {
-    //interpreter.drawSquare(new SymbolCtx(0, 0, 1, "black"), new Square(0, 0, 40, "black"));
+  $("#code-compile-run").click(() => {
     let code = codeEditor.getCode();
     interpreter.reset();
     interpreter.clear();
+
     const tree = parser.parse(code);
     const grammar = compiler.compile(tree, code);
     interpreter.setGrammar(grammar);
+
+    interpreter.init();
     interpreter.run();
-    document.getElementById("code-editor").normalize();
   });
 
   $("#canvas-download").click(() => {
@@ -63,8 +79,10 @@ async function main(params) {
   });
 
   $("#canvas-reset").click(() => {
+    interpreter.stop();
     interpreter.reset();
     interpreter.clear();
+    interpreter.init();
   });
 
   $("#canvas-step").click(() => {

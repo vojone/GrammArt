@@ -311,6 +311,13 @@ class CodeEditor {
     return this.editor.text();
   }
 
+  setCode(newCode) {
+    this.editor.text(newCode);
+    this.putCursorToOffset(0);
+    this.formatCode();
+    this.initNumbering();
+  }
+
   initNumbering() {
     const originalText = this.getCode();
     const originalNewlines = originalText.matchAll(CodeEditor.NEWLINE_REGEXP).toArray();

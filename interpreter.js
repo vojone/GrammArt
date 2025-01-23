@@ -205,8 +205,7 @@ class Interpreter {
     this.grammar = null;
     this.canvasElement = canvasElement[0];
     this.canvasElementCtx = canvasElement[0].getContext("2d");
-    this.stopped = false;
-    this.finished = false;
+    this.isRunning = false;
     if(this.canvasElementCtx === null) {
       throw new Error("Unable to get context of canvas!");
     }
@@ -225,27 +224,32 @@ class Interpreter {
     let fY = rY + origY;
 
     return [fX, fY];
-}
+  }
+
+  isFinished() {
+    return this.contextsQueue.length == 0;
+  }
+
+  hasGrammar() {
+    return this.grammar !== null;
+  }
 
   setGrammar(grammar) {
     this.grammar = grammar;
   }
 
   run() {
-    this.stopped = false;
+    this.isRunning = true;
 
-    if(!this.finished && this.contextsQueue.length == 0) {
-      this.init();
+    if(!this.isFinished()) {
+      requestAnimationFrame(() => {
+        this.makeStepUntilEnd();
+      });
     }
-
-    requestAnimationFrame(() => {
-      this.makeStepUntilEnd();
-    });
   }
 
   reset() {
-    this.stopped = false;
-    this.finished = false;
+    this.isRunning = false;
     this.contextsQueue = [];
   }
 
@@ -258,24 +262,22 @@ class Interpreter {
   }
 
   step() {
-    this.stopped = true;
+    this.isRunning = false;
 
-    if(!this.finished && this.contextsQueue.length == 0) {
-      this.init();
+    if(!this.isFinished()) {
+      requestAnimationFrame(() => {
+        this.makeStep();
+      });
     }
-
-    requestAnimationFrame(() => {
-      this.makeStep();
-    });
   }
 
   stop() {
-    this.stopped = true;
+    this.isRunning = false;
   }
 
   makeStepUntilEnd(_time) {
-    this.finished = this.makeStep();
-    if(!this.finished && !this.stopped) {
+    let finished = this.makeStep();
+    if(!finished && this.isRunning) {
       requestAnimationFrame(() => {
         this.makeStepUntilEnd();
       });
@@ -283,7 +285,7 @@ class Interpreter {
   }
 
   makeStep() {
-    if(this.contextsQueue.length == 0) {
+    if(this.isFinished()) {
       return true;
     }
 
