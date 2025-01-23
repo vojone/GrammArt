@@ -52,6 +52,7 @@ async function setup(params) {
     const grammar = compiler.compile(tree, code);
     console.log(grammar);
     interpreter.setGrammar(grammar);
+    interpreter.init();
   });
   $("#code-compile-run").click(() => {
     let code = codeEditor.getCode();

@@ -74,8 +74,13 @@
     font-size: 1.1rem;
     font-family: monospace;
     color: gray;
+    user-select: none;
 }
 
+#main-canvas {
+    margin: 20px;
+    box-shadow: 1px 1px 20px lightgray;
+}
 
 .lineno {
     padding: 0 5px;
