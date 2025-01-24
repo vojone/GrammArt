@@ -17,17 +17,24 @@
         <div class="d-flex flex-column h-100">
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
                 <img src="images/logo.svg" alt="GrammArt" draggable="false">
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".main-navbar"  aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-navbar"  aria-label="Toggle navigation">
                   <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div class="collapse navbar-collapse main-navbar">
+                <div class="collapse navbar-collapse" id="main-navbar">
                     <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
                     </ul>
                     <div class="d-inline my-2 my-lg-0">
                         <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-                            <li class="nav-item active">
-                                <a class="nav-link" href="#">Examples</a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="examplesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Examples
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="examplesDropdown">
+                                    <li><a class="dropdown-item" href="#">First</a></li>
+                                    <li><a class="dropdown-item" href="#">Sec</a></li>
+                                    <li><a class="dropdown-item" href="#">Third</a></li>
+                                </ul>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="#">Wiki</a>
