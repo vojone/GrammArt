@@ -1,5 +1,35 @@
 /* Additional layout adjustments */
 
+.controls {
+    gap: 5px;
+}
+
+.margin-top-auto {
+    margin-top: auto !important;
+}
+
+.collapse-link {
+    font-size: 0.9rem !important;
+    padding: 0 !important;
+}
+
+
+#loading-screen {
+    display: flex; /* Because of using JQuery show & hide, we need to specify display property with custom CSS */
+    gap: 10px;
+}
+
+#loading-screen .spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+#content-wrapper {
+    display: flex; /* Because of using JQuery show & hide, we need to specify display property with custom CSS */
+}
+
+
+
 #canvas-window {
     flex-grow: 3 !important;
 }
@@ -14,6 +44,7 @@
 #canvas-window #main-canvas {
     border: 1px solid black;
 }
+
 
 
 #code-window {
@@ -48,19 +79,70 @@
     display: inline-flex
 }
 
-#code-window #code-wrapper {
-    flex-grow: 1;
+#main-canvas {
+    margin: 20px;
+    box-shadow: 1px 1px 20px lightgray;
 }
 
-#code-window #code-editor {
-    width: 100%;
+#code-window #error-log-collapse.collapsed span:after {
+    content: "Show log \25B2";
 }
 
-#code-window #code-controls {
-    margin-top: auto;
+#code-window #error-log-collapse span:after {
+    content: "Hide log \25BC";
 }
 
+#code-window #error-log-label {
+    font-size: 0.7rem;
+    margin-bottom: 0 !important;
+}
 
+#code-window #error-log-label .warning {
+    color: rgb(255, 217, 0);
+}
+
+#code-window #error-log-label .error {
+    color: coral;
+}
+
+#code-window #error-log-contents {
+    min-height: 3rem;
+    max-height: 5rem;
+    overflow-y: auto;
+    background-color: whitesmoke;
+}
+
+#code-window #error-log-no-errors {
+    color: gray;
+    font-size: 0.9rem;
+    padding: 2px;
+    text-align: center;
+}
+
+#code-window #error-log-contents .msg {
+    font-size: 0.9rem;
+    padding: 2px 4px;
+}
+
+#code-window #error-log-contents .msg .pos {
+    font-weight: bold;
+    margin-right: 3px;
+}
+
+#code-window #error-log-contents .msg.err {
+    background-color: rgb(255, 210, 194);
+    border: solid 1px coral;
+}
+
+#code-window #error-log-contents .msg.warning {
+    background-color: rgb(255, 243, 80);
+    border: solid 1px rgb(255, 217, 0);
+}
+
+#code-window #error-log-contents .msg.success {
+    background-color: rgb(155, 255, 130);
+    border: solid 1px rgb(82, 211, 50);
+}
 
 /* Code editor formatting */
 
@@ -75,11 +157,6 @@
     font-family: monospace;
     color: gray;
     user-select: none;
-}
-
-#main-canvas {
-    margin: 20px;
-    box-shadow: 1px 1px 20px lightgray;
 }
 
 .lineno {

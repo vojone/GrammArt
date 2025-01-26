@@ -15,7 +15,7 @@ class Formatter {
   format(formatMarkers, text) {
     let indexOffset = 0;
     formatMarkers.forEach(fmt => {
-      let tagString = fmt.toString();
+      let tagString = fmt.toHTML();
       text = text.slice(0, fmt.index + indexOffset) + tagString + text.slice(fmt.index + indexOffset);
       indexOffset += tagString.length;
     });
@@ -58,7 +58,7 @@ class OpeningTag extends FormatTag {
     this.title = title;
   }
 
-  toString() {
+  toHTML() {
     return `<span class="${this.htmlClassName}" title="${this.title}">`;
   }
 }
@@ -69,10 +69,59 @@ class ClosingTag extends FormatTag {
     super(index);
   }
 
-  toString() {
+  toHTML() {
     return "</span>";
   }
 }
+
+
+class LogMessage {
+  constructor(cls, description, row, column, offset) {
+    this.cls = cls;
+    this.description = description;
+    this.row = row;
+    this.column = column;
+    this.offset = offset;
+  }
+
+  toHTML() {
+    let positionString = "";
+    if(this.row !== null) {
+      positionString += this.row + ":";
+    }
+    if(this.column !== null) {
+      positionString += this.column + ":";
+    }
+    positionString = positionString ? `<span class="pos">${positionString}</span>&nbsp;` : "";
+    return `<span class=\"msg ${cls}\">${positionString}${this.description}</span>`;
+  }
+}
+
+
+class Logger {
+  constructor(countsElement, noErrorsMessageElement, messagesElement) {
+    this.countsElement = countsElement
+    this.noErrorsMessageElement = noErrorsMessageElement
+    this.messagesElement = messagesElement
+    this.messages = []
+  }
+
+  refresh() {
+    this.countsElement.html();
+    this.messages.html();
+    if(this.messages.length === 0) {
+      this.noErrorsMessageElement.show();
+    }
+    else {
+      this.noErrorsMessageElement.hide();
+    }
+
+    this.messages.forEach((m) => {
+      this.messagesElement.append(m.toHTML());
+    });
+  }
+}
+
 
 
 class Linter extends Traverser {
@@ -239,7 +288,7 @@ class CodeEditor {
           this.putCursorToOffset(this.cursor);
         }
       }
-      if(e.key === "Tab") {
+      else if(e.key === "Tab") {
         e.preventDefault();
 
         this.saveRevision();

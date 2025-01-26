@@ -15,8 +15,32 @@ $(document).ready(() => {
       await Parser.init({"wasmBinary" : TREE_SITTER_WASM});
     }
     await setup();
+
+    // Hide spinner, show loader
+    finishLoading();
   })();
 });
+
+function finishLoading() {
+  $("#loading-screen").hide();
+  $("#content-wrapper").show();
+}
+
+function compile(codeEditor, parser, compiler, interpreter) {
+  let code = codeEditor.getCode();
+  interpreter.reset();
+  interpreter.clear();
+
+  const tree = parser.parse(code);
+  const grammar = compiler.compile(tree, code);
+  interpreter.setGrammar(grammar);
+  interpreter.init();
+}
+
+
+function runCompiled(interpreter) {
+  interpreter.run();
+}
 
 
 async function setup(params) {
@@ -31,6 +55,18 @@ async function setup(params) {
 
   let compiler = new Compiler();
   let interpreter = new Interpreter(new InitialCtx(250, 250, 10, "black", 0), $("#main-canvas"));
+
+  sessionStorage.setItem("test_val", "value");
+  let data = sessionStorage.getItem("test_val");
+  console.log(data);
+
+  $(document).keydown(e => {
+    const origEvent = e.originalEvent;
+    if (origEvent.ctrlKey && origEvent.key == 'Enter') {
+      compile(codeEditor, parser, compiler, interpreter);
+      runCompiled(interpreter);
+    }
+  });
 
   $("#code-save").click(() => {
     let code = codeEditor.getCode();
@@ -47,24 +83,11 @@ async function setup(params) {
     codeEditor.formatCode();
   });
   $("#code-compile").click(() => {
-    let code = codeEditor.getCode();
-    const tree = parser.parse(code);
-    const grammar = compiler.compile(tree, code);
-    console.log(grammar);
-    interpreter.setGrammar(grammar);
-    interpreter.init();
+    compile(codeEditor, parser, compiler, interpreter);
   });
   $("#code-compile-run").click(() => {
-    let code = codeEditor.getCode();
-    interpreter.reset();
-    interpreter.clear();
-
-    const tree = parser.parse(code);
-    const grammar = compiler.compile(tree, code);
-    interpreter.setGrammar(grammar);
-
-    interpreter.init();
-    interpreter.run();
+    compile(codeEditor, parser, compiler, interpreter);
+    runCompiled(interpreter);
   });
 
   $("#canvas-download").click(() => {
