@@ -56,6 +56,44 @@
             </div>
 
             <div id="content-wrapper" style="display:none" class="flex-lg-row flex-column-reverse flex-fill">
+                <div class="modal fade" id="save-modal" tabindex="-1" role="dialog" aria-labelledby="save-modal-label" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="save-modal-label">Export image</h5>
+                                <button type="button" class="canvas-export-close close" data-bs-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <label for="export-name">Name</label>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" id="export-name" aria-label="Name of exported image">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">.png</span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="export-resolution">Resolution</label>
+                                    <div>
+                                        <select class="form-select" id="export-resolution" aria-label="Resolution of exported image">
+                                            <option selected value="1">x1</option>
+                                            <option value="2">x2</option>
+                                            <option value="4">x4</option>
+                                            <option value="8">x8</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary canvas-export-close" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" id="canvas-export-button">Export</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="code-window" class="flex-fill d-flex flex-column">
                     <div id="code-editor-wrapper">
                         <div id="line-numbering"></div>
@@ -97,7 +135,7 @@ rule a 0.7 { square { } a { 1 1 r 10 s 0.99 } }</div>
                         <canvas id="main-canvas" class="align-self-center" height="500" width="500"></canvas>
                     </div>
                     <div id="canvas-controls" class="d-flex controls justify-content-center m-2">
-                        <button type="button" class="btn btn-primary btn-sm" id="canvas-download"><i class="bi bi-image"></i>&nbsp;Save</button>
+                        <button type="button" data-bs-toggle="modal" data-bs-target="#save-modal" class="btn btn-primary btn-sm" id="canvas-export"><i class="bi bi-image"></i>&nbsp;Export</button>
                         <button type="button" class="btn btn-primary" id="canvas-reset"><i class="bi bi-arrow-clockwise"></i>&nbsp;Reset</button>
                         <button type="button" class="btn btn-primary" id="canvas-run"><i class="bi bi-fast-forward-fill"></i></button>
                         <button type="button" class="btn btn-primary" id="canvas-step"><i class="bi bi-play-fill"></i></button>

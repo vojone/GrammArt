@@ -26,6 +26,12 @@ function finishLoading() {
   $("#content-wrapper").show();
 }
 
+function dateString() {
+  let currentDate = new Date();
+  let currentDateStr = `${padZero(currentDate.getDate())}${padZero(currentDate.getMonth() + 1)}-${padZero(currentDate.getHours())}${padZero(currentDate.getMinutes())}${padZero(currentDate.getSeconds())}`;
+  return currentDateStr;
+}
+
 function compile(codeEditor, parser, compiler, interpreter) {
   let code = codeEditor.getCode();
   interpreter.reset();
@@ -44,6 +50,7 @@ function runCompiled(interpreter) {
 
 
 async function setup(params) {
+  let wasInterpreterRunning;
   const parser = new Parser();
   const languagePath = "tree-sitter-grammartcfg/tree-sitter-grammartcfg.wasm";
   const language = (typeof TREE_SITTER_CFG_WASM === 'undefined' || TREE_SITTER_CFG_WASM === null) ? languagePath : TREE_SITTER_CFG_WASM;
@@ -70,9 +77,7 @@ async function setup(params) {
 
   $("#code-save").click(() => {
     let code = codeEditor.getCode();
-    let currentDate = new Date();
-    let currentDateStr = `${padZero(currentDate.getDate())}${padZero(currentDate.getMonth() + 1)}-${padZero(currentDate.getHours())}${padZero(currentDate.getMinutes())}${padZero(currentDate.getSeconds())}`;
-    downloadText(code, `GrammarArt-${currentDateStr}.gcfg`);
+    downloadText(code, `GrammArt-${dateString()}.gcfg`);
   });
   $("#code-load").click(() => {
     loadTextFileInput((code) => {
@@ -90,8 +95,25 @@ async function setup(params) {
     runCompiled(interpreter);
   });
 
-  $("#canvas-download").click(() => {
-    downloadCanvasContent("main-canvas", "result", 500, 500);
+  $("#canvas-export").click(() => {
+    wasInterpreterRunning = interpreter.isRunning;
+    interpreter.stop();
+    $("#export-name").val(`Image-GrammarArt-${dateString()}`);
+  });
+
+  $("#save-modal").on("hidden.bs.modal", () => {
+    if(wasInterpreterRunning) {
+      interpreter.run();
+    }
+  });
+
+  $("#canvas-export-button").click(() => {
+    let canvaBoundingRect = $("#main-canvas")[0];
+    let canvasWidth = canvaBoundingRect.width;
+    let canvasHeight = canvaBoundingRect.height;
+    let resolutionFactor = $("#export-resolution").val();
+
+    downloadCanvasContent("main-canvas", $("#export-name").val(), canvasWidth * resolutionFactor, canvasHeight * resolutionFactor);
   });
 
   $("#canvas-run").click(() => {

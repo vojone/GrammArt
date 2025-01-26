@@ -334,7 +334,7 @@ class CodeEditor {
 
     const tree = this.parser.parse(code);
 
-    const fmt = [...this.highlighter.highlight(tree, code) ];
+    const fmt = [...this.highlighter.highlight(tree, code), ...this.linter.lint(tree, code) ];
 
     const sortedFmt = fmt.sort(FormatTag.sort);
     const formatted = this.formatter.format(sortedFmt, code);
