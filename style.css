@@ -117,10 +117,16 @@
     font-size: 0.9rem;
     padding: 2px;
     text-align: center;
+    margin: auto;
+    width: 100%;
+    height: 100%;
+    display: block;
 }
 
 #code-window #error-log-contents .msg {
     font-size: 0.9rem;
+    display: block;
+    width: 100%;
     padding: 2px 4px;
 }
 
@@ -184,6 +190,12 @@
 }
 
 .code span.err {
+    text-decoration-line: underline;
+    text-decoration-style: wavy;
+    text-decoration-color: red;
+}
+
+.code span.serr {
     text-decoration-line: underline;
     text-decoration-style: wavy;
     text-decoration-color: red;

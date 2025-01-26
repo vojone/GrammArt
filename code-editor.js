@@ -90,10 +90,10 @@ class LogMessage {
       positionString += this.row + ":";
     }
     if(this.column !== null) {
-      positionString += this.column + ":";
+      positionString += this.column;
     }
     positionString = positionString ? `<span class="pos">${positionString}</span>&nbsp;` : "";
-    return `<span class=\"msg ${cls}\">${positionString}${this.description}</span>`;
+    return `<span class=\"msg ${this.cls}\">${positionString}${this.description}</span>`;
   }
 }
 
@@ -106,19 +106,61 @@ class Logger {
     this.messages = []
   }
 
+  static nodeToMessage(ctx, node, cls, description, offsetStart = 0) {
+    ctx.messages.push(
+      new LogMessage(
+        cls,
+        description,
+        node.startPosition.row + 1,
+        node.startPosition.column,
+        node.startIndex + offsetStart
+      )
+    );
+  }
+
+  clear() {
+    this.messages = [];
+  }
+
+  setMessages(messages) {
+    this.messages = messages;
+  }
+
+  appendMessage(msg) {
+    this.messages.push(msg);
+  }
+
   refresh() {
-    this.countsElement.html();
-    this.messages.html();
-    if(this.messages.length === 0) {
+    let errorCnt = 0;
+    let warningCnt = 0;
+
+    this.countsElement.html("");
+    this.messagesElement.html("");
+    if(this.messages.length == 0) {
       this.noErrorsMessageElement.show();
     }
     else {
       this.noErrorsMessageElement.hide();
     }
 
+    this.messages = this.messages.sort((m1, m2) => m1.offset - m2.offset);
+
     this.messages.forEach((m) => {
       this.messagesElement.append(m.toHTML());
+      if(m.cls == "err") {
+        errorCnt += 1;
+      }
+      else if(m.cls == "warning") {
+        warningCnt += 1;
+      }
     });
+
+    if(errorCnt == 0 && warningCnt == 0) {
+      this.countsElement.html("No errors");
+    }
+    else {
+      this.countsElement.html(`(${errorCnt} errors, ${warningCnt} warnings)`);
+    }
   }
 }
 
@@ -132,15 +174,89 @@ class Linter extends Traverser {
 
   lint(tree, text) {
     let formatMarkers = [];
-    this.inorder(tree, this.processNode, { "text": text, "formatMarkers": formatMarkers, "cls" : this.cls });
-    return formatMarkers;
+    let messages = [];
+    let symbolTable = {};
+
+    this.inorder(tree, this.processNodePrep, {
+      "text": text,
+      "symbolTable": symbolTable
+    });
+
+    this.inorder(tree, this.processNode, {
+      "text": text,
+      "formatMarkers": formatMarkers,
+      "messages": messages,
+      "symbolTable": symbolTable,
+      "cls" : this.cls
+    });
+    return [formatMarkers, messages];
+  }
+
+  processNodePrep(node, ctx) {
+    let skipDescendants = false;
+    switch (node.type) {
+      case "rule_decl":
+        let ruleName = getStringByFieldName(node, "name");
+        ctx.symbolTable[ruleName] = { "type" : "rule" };
+        break;
+
+      default:
+        break;
+    }
+
+    return skipDescendants;
   }
 
   // Language specific function
   processNode(node, ctx) {
-    console.log(node.type);
-    console.log(node);
-    return true;
+    let skipDescendants = false;
+    if(node.isMissing) {
+      Formatter.formatNode(ctx, node, "err", `Missing ${node.type}`, -1);
+      Logger.nodeToMessage(ctx, node, "err", `Missing ${node.type}!`, -1);
+      return skipDescendants;
+    }
+
+    switch (node.type) {
+      case "ERROR":
+        Formatter.formatNode(ctx, node, "err", "Syntax error");
+        Logger.nodeToMessage(ctx, node, "err", "Syntax error!");
+        skipDescendants = true;
+        break;
+
+      case "shape":
+        var entryPointName = getStringByFieldName(node, "entry_point");
+        if(!Object.hasOwn(ctx.symbolTable, entryPointName) ||
+          ctx.symbolTable[entryPointName].type !== "rule") {
+          Formatter.formatNode(ctx, node, "serr", "Bad entry point!");
+          Logger.nodeToMessage(ctx, node, "err", `Entry point '${entryPointName}' is not a rule!`);
+        }
+        break;
+
+      case "non_terminal":
+        var name = getStringByFieldName(node, "name");
+        var nameNode = getChildByFieldName(node, "name");
+        if(!Object.hasOwn(ctx.symbolTable, name) || ctx.symbolTable[name].type !== "rule") {
+          Formatter.formatNode(ctx, nameNode, "serr", "Invalid nonterminal!");
+          Logger.nodeToMessage(ctx, nameNode, "err", `Nonterminal '${name}' is not a rule!`);
+        }
+        break;
+
+      case "rule_decl":
+        var name = getStringByFieldName(node, "name");
+        var weight = getFloatByFieldName(node, "weight", null);
+        var weightNode = getChildByFieldName(node, "weight");
+        if(weight !== null && weight < 0) {
+          Formatter.formatNode(ctx, weightNode, "serr", "Invalid weight!");
+          Logger.nodeToMessage(ctx, weightNode, "err", `Weight of rule '${name}' must be non-negative number! Got ${weight}`);
+        }
+        break;
+
+
+      default:
+        break;
+    }
+
+    return skipDescendants;
   }
 }
 
@@ -170,13 +286,12 @@ class Highlighter extends Traverser {
   processNode(node, ctx) {
     let skipDescendants = false;
     if(node.isMissing) {
-      Formatter.formatNode(ctx, node, "err", `Missing ${node.type}`, -1);
-      return skipDescendants;
+      return true;
     }
 
     switch (node.type) {
       case "ERROR":
-        Formatter.formatNode(ctx, node, "err", "Syntax error");
+        skipDescendants = true;
         break;
 
       case "shape":
@@ -227,7 +342,7 @@ class CodeEditor {
 
   MAX_REVISIONS = 20
 
-  constructor(editor, lineNumbers, parser) {
+  constructor(editor, lineNumbers, msgCounts, noErrorsMsg, msgLog, parser) {
     this.editor = editor;
     this.lineNumbers = lineNumbers;
     this.origLineNumber = null;
@@ -235,6 +350,7 @@ class CodeEditor {
     this.highlighter = new Highlighter("hght", editor);
     this.linter = new Linter("lnt", editor);
     this.formatter = new Formatter(editor);
+    this.logger = new Logger(msgCounts, noErrorsMsg, msgLog);
     this.parser = parser;
     this.previousRevisions = [];
     this.previousCursors = [];
@@ -334,12 +450,19 @@ class CodeEditor {
 
     const tree = this.parser.parse(code);
 
-    const fmt = [...this.highlighter.highlight(tree, code), ...this.linter.lint(tree, code) ];
+    console.log(tree.rootNode.toString());
+
+    const [ linterFmt, linterMessages ] = this.linter.lint(tree, code);
+    console.log(linterMessages);
+    const fmt = [ ...linterFmt, ...this.highlighter.highlight(tree, code) ];
 
     const sortedFmt = fmt.sort(FormatTag.sort);
     const formatted = this.formatter.format(sortedFmt, code);
 
     this.editor.html(formatted);
+
+    this.logger.setMessages(linterMessages);
+    this.logger.refresh();
   }
 
   clearFormatting() {

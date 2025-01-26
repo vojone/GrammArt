@@ -57,9 +57,9 @@ class Compiler extends Traverser {
     return Compiler.createTerminal(type, unnamedArgs, namedArgs);
   }
 
-  static compileNonTerminal(terminalNode) {
-    let name = getStringByFieldName(terminalNode, "name");
-    let argumentsNode = getChildByFieldName(terminalNode, "arguments");
+  static compileNonTerminal(nonTerminalNode) {
+    let name = getStringByFieldName(nonTerminalNode, "name");
+    let argumentsNode = getChildByFieldName(nonTerminalNode, "arguments");
     let [unnamedArgs, namedArgs] = Compiler.compileArguments(argumentsNode);
     return Compiler.createNonTerminal(name, unnamedArgs, namedArgs);
   }

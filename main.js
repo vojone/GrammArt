@@ -57,7 +57,14 @@ async function setup(params) {
   const CFGLanguageGrammar = await Parser.Language.load(language);
   parser.setLanguage(CFGLanguageGrammar);
 
-  let codeEditor = new CodeEditor($("#code-editor"), $("#line-numbering"), parser);
+  let codeEditor = new CodeEditor(
+    $("#code-editor"),
+    $("#line-numbering"),
+    $("#error-log-counts"),
+    $("#error-log-no-errors"),
+    $("#error-log-messages"),
+    parser
+  );
   codeEditor.init();
 
   let compiler = new Compiler();
