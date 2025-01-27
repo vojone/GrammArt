@@ -21,9 +21,22 @@ $(document).ready(() => {
   })();
 });
 
+function disable(button) {
+  button.prop("disabled", true);
+}
+
+function enable(button) {
+  button.removeAttr("disabled");
+}
+
 function finishLoading() {
   $("#loading-screen").hide();
   $("#content-wrapper").show();
+
+  disable($("#canvas-stop"));
+  disable($("#canvas-run"));
+  disable($("#canvas-step"));
+  disable($("#canvas-reset"));
 }
 
 function dateString() {
@@ -46,8 +59,37 @@ function compile(codeEditor, parser, compiler, interpreter) {
 
 function runCompiled(interpreter) {
   interpreter.run();
+
+  enable($("#canvas-stop"));
+  disable($("#canvas-run"));
+  enable($("#canvas-step"));
 }
 
+function canvasRun(interpreter) {
+  runCompiled(interpreter);
+}
+
+function canvasStep(interpreter) {
+  interpreter.stop();
+  interpreter.step();
+
+  disable($("#canvas-stop"));
+  enable($("#canvas-run"));
+  enable($("#canvas-step"));
+}
+
+function canvasStop(interpreter) {
+  interpreter.stop();
+
+  disable($("#canvas-stop"));
+  enable($("#canvas-run"));
+  enable($("#canvas-step"));
+}
+
+function canvasExport(interpreter) {
+  interpreter.stop();
+  $("#export-name").val(`Image-GrammarArt-${dateString()}`);
+}
 
 async function setup(params) {
   let wasInterpreterRunning;
@@ -76,9 +118,23 @@ async function setup(params) {
 
   $(document).keydown(e => {
     const origEvent = e.originalEvent;
-    if (origEvent.ctrlKey && origEvent.key == 'Enter') {
+    if (origEvent.ctrlKey && origEvent.key == "Enter") {
       compile(codeEditor, parser, compiler, interpreter);
       runCompiled(interpreter);
+    }
+    else if(!$("#canvas-run[disabled]").length && origEvent.altKey && origEvent.shiftKey && origEvent.key == "ArrowRight") {
+      canvasRun(interpreter);
+    }
+    else if(!$("#canvas-strp[disabled]").length && origEvent.altKey && origEvent.shiftKey && origEvent.key == "ArrowUp") {
+      canvasStep(interpreter);
+    }
+    else if(!$("#canvas-stop[disabled]").length && origEvent.altKey && origEvent.shiftKey && origEvent.key == "ArrowDown") {
+      canvasStop(interpreter);
+    }
+    else if(origEvent.altKey && origEvent.shiftKey && (origEvent.key == "e" || origEvent.key == "E")) {
+      $("#save-modal").modal("show");
+      wasInterpreterRunning = interpreter.isRunning;
+      canvasExport(interpreter);
     }
   });
 
@@ -96,22 +152,31 @@ async function setup(params) {
   });
   $("#code-compile").click(() => {
     compile(codeEditor, parser, compiler, interpreter);
+
+    enable($("#canvas-run"));
+    enable($("#canvas-step"));
+    enable($("#canvas-reset"));
   });
   $("#code-compile-run").click(() => {
     compile(codeEditor, parser, compiler, interpreter);
     runCompiled(interpreter);
+
+    enable($("#canvas-reset"));
   });
 
   $("#canvas-export").click(() => {
     wasInterpreterRunning = interpreter.isRunning;
-    interpreter.stop();
-    $("#export-name").val(`Image-GrammarArt-${dateString()}`);
+    canvasExport(interpreter);
   });
 
   $("#save-modal").on("hidden.bs.modal", () => {
     if(wasInterpreterRunning) {
       interpreter.run();
     }
+  });
+
+  $("#save-modal").on("shown.bs.modal", () => {
+    $("#canvas-export-button").focus();
   });
 
   $("#canvas-export-button").click(() => {
@@ -124,11 +189,11 @@ async function setup(params) {
   });
 
   $("#canvas-run").click(() => {
-    interpreter.run();
+    canvasRun(interpreter);
   });
 
   $("#canvas-stop").click(() => {
-    interpreter.stop();
+    canvasStop(interpreter);
   });
 
   $("#canvas-reset").click(() => {
@@ -136,10 +201,13 @@ async function setup(params) {
     interpreter.reset();
     interpreter.clear();
     interpreter.init();
+
+    disable($("#canvas-stop"));
+    enable($("#canvas-run"));
+    enable($("#canvas-step"));
   });
 
   $("#canvas-step").click(() => {
-    interpreter.stop();
-    interpreter.step();
+    canvasStep(interpreter);
   });
 }
