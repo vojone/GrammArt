@@ -93,7 +93,7 @@ class LogMessage {
       positionString += this.column;
     }
     positionString = positionString ? `<span class="pos">${positionString}</span>&nbsp;` : "";
-    return `<span class=\"msg ${this.cls}\">${positionString}${this.description}</span>`;
+    return `<span class=\"msg ${this.cls}\" data-offset=\"${this.offset}\">${positionString}${this.description}</span>`;
   }
 }
 
@@ -116,6 +116,11 @@ class Logger {
         node.startIndex + offsetStart
       )
     );
+  }
+
+  init(msgClickFn) {
+    this.messagesElement.on("click", ".msg", msgClickFn);
+    this.refresh();
   }
 
   clear() {
@@ -225,10 +230,11 @@ class Linter extends Traverser {
 
       case "shape":
         var entryPointName = getStringByFieldName(node, "entry_point");
+        var entryPointNode = getChildByFieldName(node, "entry_point");
         if(!Object.hasOwn(ctx.symbolTable, entryPointName) ||
           ctx.symbolTable[entryPointName].type !== "rule") {
-          Formatter.formatNode(ctx, node, "serr", "Bad entry point!");
-          Logger.nodeToMessage(ctx, node, "err", `Entry point '${entryPointName}' is not a rule!`);
+          Formatter.formatNode(ctx, entryPointNode, "serr", "Bad entry point!");
+          Logger.nodeToMessage(ctx, entryPointNode, "err", `Entry point '${entryPointName}' is not a rule!`);
         }
         break;
 
@@ -363,6 +369,11 @@ class CodeEditor {
     if(this.isChrome) {
       this.editor.prop("contentEditable", "plaintext-only");
     }
+
+    this.logger.init((e) => {
+      let targetOffset = $(e.target).data("offset");
+      this.putCursorToOffset(targetOffset);
+    });
 
     this.formatCode();
     this.initNumbering();

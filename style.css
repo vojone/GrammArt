@@ -128,6 +128,7 @@
     display: block;
     width: 100%;
     padding: 2px 4px;
+    cursor: pointer;
 }
 
 #code-window #error-log-contents .msg .pos {
