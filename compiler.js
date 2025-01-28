@@ -116,7 +116,7 @@ class Compiler extends Traverser {
 
   static _processUnnamedArgs(smybolCls, args) {
     if (smybolCls.ARGS.length < args.length) {
-      throw new Error(`Too many arguments for terminal ${type}`);
+      throw new Error(`Too many arguments for symbol ${type}`);
     }
 
     let result = {};

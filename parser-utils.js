@@ -60,6 +60,10 @@ function validateNumber(n) {
   return isNaN(result) ? null : result;
 }
 
+function validatePostiveNumberOrZero(n) {
+  let result = parseFloat(n);
+  return (isNaN(result) || result < 0) ? null : result;
+}
 
 function acceptAllStrings(s) {
   return s;

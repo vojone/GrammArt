@@ -16,7 +16,7 @@ class NonTerminal extends MSymbol {
   static ARGS = {
     "x" : validateNumber,
     "y" : validateNumber,
-    "s" : validateNumber,
+    "s" : validatePostiveNumberOrZero,
     "r" : validateNumber,
   }
 
@@ -51,7 +51,7 @@ class Square extends Terminal {
   static ARG_ORDER = [...Terminal.ARG_ORDER, "s", "c", "r"]
 
   static ARGS = Object.assign(Terminal.ARGS, {
-    "s" : validateNumber,
+    "s" : validatePostiveNumberOrZero,
     "color" : acceptAllStrings,
     "r": validateNumber,
   })
@@ -69,7 +69,7 @@ class Circle extends Terminal {
   static ARG_ORDER = [...Terminal.ARG_ORDER, "s", "c", "r"]
 
   static ARGS = Object.assign(Terminal.ARGS, {
-    "size" : validateNumber,
+    "size" : validatePostiveNumberOrZero,
     "color" : acceptAllStrings,
     "r": validateNumber,
   })

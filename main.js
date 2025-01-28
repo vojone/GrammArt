@@ -90,7 +90,7 @@ function canvasExport(interpreter) {
   interpreter.stop();
   $("#export-name").val(`Image-GrammarArt-${dateString()}`);
 }
-
+var dbg;
 async function setup(params) {
   let wasInterpreterRunning;
   const parser = new Parser();

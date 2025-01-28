@@ -239,12 +239,11 @@ class Linter extends Traverser {
         break;
 
       case "non_terminal":
-        var name = getStringByFieldName(node, "name");
-        var nameNode = getChildByFieldName(node, "name");
-        if(!Object.hasOwn(ctx.symbolTable, name) || ctx.symbolTable[name].type !== "rule") {
-          Formatter.formatNode(ctx, nameNode, "serr", "Invalid nonterminal!");
-          Logger.nodeToMessage(ctx, nameNode, "err", `Nonterminal '${name}' is not a rule!`);
-        }
+        Linter._checkNonterminal(ctx, node);
+        break;
+
+      case "terminal":
+        Linter._checkTerminal(ctx, node);
         break;
 
       case "rule_decl":
@@ -263,6 +262,85 @@ class Linter extends Traverser {
     }
 
     return skipDescendants;
+  }
+
+  static _checkTerminal(ctx, node) {
+    var type = getStringByFieldName(node, "type");
+    let typeCls = null;
+    switch (type) {
+      case "square":
+        typeCls = Square;
+        break;
+      case "circle":
+        typeCls = Circle;
+        break;
+    }
+
+    let argumentsNode = getChildByFieldName(node, "arguments");
+    Linter._checkArgs(ctx, typeCls, argumentsNode);
+  }
+
+  static _checkNonterminal(ctx, node) {
+    var name = getStringByFieldName(node, "name");
+    var nameNode = getChildByFieldName(node, "name");
+    if(!Object.hasOwn(ctx.symbolTable, name) || ctx.symbolTable[name].type !== "rule") {
+      Formatter.formatNode(ctx, nameNode, "serr", "Invalid nonterminal!");
+      Logger.nodeToMessage(ctx, nameNode, "err", `Nonterminal '${name}' is not a rule!`);
+      return;
+    }
+
+    let argumentsNode = getChildByFieldName(node, "arguments");
+    const symbolCls = NonTerminal;
+    Linter._checkArgs(ctx, symbolCls, argumentsNode);
+  }
+
+  static _checkArgs(ctx, symbolCls, argumentsNode) {
+    let args = argumentsNode.childrenForFieldName("arg");
+    let argsCnt = 0;
+    let namedArgsCnt = 0;
+
+    args.forEach((argNode) => {
+      argsCnt++;
+      let argName = getStringByFieldName(argNode, "name");
+      let argNameNode = getChildByFieldName(argNode, "name");
+      let argVal = getStringByFieldName(argNode, "value");
+      let argValNode = getChildByFieldName(argNode, "value");
+
+      if (Object.keys(symbolCls.ARGS).length < argsCnt) {
+        Formatter.formatNode(ctx, argumentsNode, "serr", "Too many arguments!");
+        Logger.nodeToMessage(ctx, argumentsNode, "err", `Too many arguments!`);
+        return;
+      }
+
+      if(namedArgsCnt > 0 && argName === null) {
+        Formatter.formatNode(ctx, argNode, "serr", "Unnamed argument after named ones!");
+        Logger.nodeToMessage(ctx, argNode, "err", "Unnamed argument after named ones!");
+        return;
+      }
+
+      if(argName !== null) {
+        namedArgsCnt++;
+        if(!Object.hasOwn(symbolCls.ARGS, argName)) {
+          Formatter.formatNode(ctx, argNameNode, "serr", "Unknown argument!");
+          Logger.nodeToMessage(ctx, argNameNode, "err", `Unknown argument '${argName}'!`);
+          return;
+        }
+
+        const parsedArgVal = symbolCls.ARGS[argName](argVal);
+        if(parsedArgVal === null) {
+          Formatter.formatNode(ctx, argValNode, "serr", "Invalid value!");
+          Logger.nodeToMessage(ctx, argValNode, "err", `Invalid value of '${argName}'!`);
+        }
+      }
+      else {
+        const argName = symbolCls.ARG_ORDER[argsCnt - 1];
+        const parsedArgVal = symbolCls.ARGS[argName](argVal);
+        if(parsedArgVal === null) {
+          Formatter.formatNode(ctx, argValNode, "serr", "Invalid value!");
+          Logger.nodeToMessage(ctx, argValNode, "err", `Invalid value of '${argName}'!`);
+        }
+      }
+    });
   }
 }
 
