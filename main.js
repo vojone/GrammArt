@@ -18,6 +18,8 @@ $(document).ready(() => {
 
     // Hide spinner, show loader
     finishLoading();
+    setupDraggableCanvas();
+    centerCanvas();
   })();
 });
 
@@ -45,6 +47,47 @@ function dateString() {
   return currentDateStr;
 }
 
+function setupDraggableCanvas() {
+  const canvasContainerElement = $("#canvas-wrapper")[0];
+  let dragging = false;
+  let startX, startY, scrollLeft, scrollTop;
+
+  $("#canvas-wrapper").on("mousedown", (e) => {
+    dragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    scrollLeft = canvasContainerElement.scrollLeft;
+    scrollTop = canvasContainerElement.scrollTop;
+    canvasContainerElement.style.cursor = "grabbing";
+  });
+
+  $("#canvas-wrapper").on("mousemove", (e) => {
+    if (!dragging) {
+      return;
+    };
+    let dx = e.clientX - startX;
+    let dy = e.clientY - startY;
+    canvasContainerElement.scrollLeft = scrollLeft - dx;
+    canvasContainerElement.scrollTop = scrollTop - dy;
+  });
+
+  $("#canvas-wrapper").on("mouseup", () => {
+    dragging = false;
+    canvasContainerElement.style.cursor = "grab";
+  });
+  $("#canvas-wrapper").on("mouseleave", () => {
+    dragging = false;
+    canvasContainerElement.style.cursor = "grab";
+  });
+}
+
+function centerCanvas() {
+  const container = $("#canvas-wrapper")[0];
+  const canvas = $("#main-canvas")[0];
+  container.scrollLeft = (canvas.width - container.clientWidth)*0.5;
+  container.scrollTop = (canvas.height - container.clientHeight)*0.5;
+}
+
 function compile(codeEditor, parser, compiler, interpreter) {
   let code = codeEditor.getCode();
   interpreter.reset();
@@ -60,6 +103,7 @@ function compile(codeEditor, parser, compiler, interpreter) {
 function runCompiled(interpreter) {
   interpreter.run();
 
+  enable($("#canvas-reset"));
   enable($("#canvas-stop"));
   disable($("#canvas-run"));
   enable($("#canvas-step"));
@@ -209,5 +253,18 @@ async function setup(params) {
 
   $("#canvas-step").click(() => {
     canvasStep(interpreter);
+  });
+
+  $("#toggle-window-button").click(() => {
+    if($("#toggle-window-button").hasClass("visible")) {
+      $("#code-window").addClass("hidden");
+      $("#toggle-window-button").addClass("hidden");
+      $("#toggle-window-button").removeClass("visible");
+    }
+    else {
+      $("#code-window").removeClass("hidden");
+      $("#toggle-window-button").addClass("visible");
+      $("#toggle-window-button").removeClass("hidden");
+    }
   });
 }
