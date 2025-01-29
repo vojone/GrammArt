@@ -20,9 +20,15 @@ module.exports = grammar({
   rules: {
     source_file: $ => optional(
       seq(
+        optional($.global_settings),
         $.shape,
         repeat($.rule_decl),
       )
+    ),
+
+    global_settings: $ => seq(
+      "global",
+      field("arguments", $.arguments),
     ),
 
     shape: $ => seq(
@@ -80,8 +86,35 @@ module.exports = grammar({
     ),
 
     argument: $ => seq(
-      field("name", optional($.identifier)),
-      field("value", $.number),
+      optional(
+        seq(
+          field("name",
+            $.identifier
+          ),
+          token.immediate(":"),
+        )
+      ),
+      field("value", choice(
+          $.number,
+          $.color
+        )
+      ),
+    ),
+
+    color: $ => seq(
+      field("scheme",
+        choice(
+          "rgb",
+          "rgba",
+        ),
+      ),
+      token.immediate("("),
+      field("channel",
+        repeat1(
+          $.number,
+        )
+      ),
+      ")",
     ),
 
     identifier: _ => /[a-zA-Z][a-zA-Z0-9]*/,

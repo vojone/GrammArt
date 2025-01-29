@@ -17,6 +17,14 @@ npx tree-sitter-cli generate
 npx tree-sitter build --wasm
 ```
 
+Generate JS files containing buffers with contents of WASM files:
+
+```
+mkdir dist
+python3 to-base64.py tree-sitter-grammartcfg/tree-sitter-grammartcfg.wasm TREE_SITTER_CFG_WASM array >dist/tree-sitter-grammartcfg-base64.js
+python3 to-base64.py deps/tree-sitter.wasm TREE_SITTER_WASM >dist/tree-sitter-base64.js
+```
+
 
 ## Third party dependencies
 
