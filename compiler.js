@@ -115,7 +115,7 @@ class Compiler extends Traverser {
   }
 
   static _processUnnamedArgs(smybolCls, args) {
-    if (smybolCls.ARGS.length < args.length) {
+    if (Object.keys(smybolCls.ARGS).length < args.length) {
       throw new Error(`Too many arguments for symbol ${type}`);
     }
 

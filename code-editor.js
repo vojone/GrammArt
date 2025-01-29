@@ -299,18 +299,18 @@ class Linter extends Traverser {
     let argsCnt = 0;
     let namedArgsCnt = 0;
 
+    if (Object.keys(symbolCls.ARGS).length < args.length) {
+      Formatter.formatNode(ctx, argumentsNode, "serr", "Too many arguments!");
+      Logger.nodeToMessage(ctx, argumentsNode, "err", `Too many arguments!`);
+      return;
+    }
+
     args.forEach((argNode) => {
       argsCnt++;
       let argName = getStringByFieldName(argNode, "name");
       let argNameNode = getChildByFieldName(argNode, "name");
       let argVal = getStringByFieldName(argNode, "value");
       let argValNode = getChildByFieldName(argNode, "value");
-
-      if (Object.keys(symbolCls.ARGS).length < argsCnt) {
-        Formatter.formatNode(ctx, argumentsNode, "serr", "Too many arguments!");
-        Logger.nodeToMessage(ctx, argumentsNode, "err", `Too many arguments!`);
-        return;
-      }
 
       if(namedArgsCnt > 0 && argName === null) {
         Formatter.formatNode(ctx, argNode, "serr", "Unnamed argument after named ones!");

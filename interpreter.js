@@ -50,11 +50,11 @@ class Terminal extends MSymbol {
 class Square extends Terminal {
   static ARG_ORDER = [...Terminal.ARG_ORDER, "s", "c", "r"]
 
-  static ARGS = Object.assign(Terminal.ARGS, {
+  static ARGS = Object.assign({
     "s" : validatePostiveNumberOrZero,
-    "color" : acceptAllStrings,
+    "c" : acceptAllStrings,
     "r": validateNumber,
-  })
+  }, Terminal.ARGS)
 
   constructor(x = 0, y = 0, size = 1, color = "black", r = 0) {
     super(x, y);
@@ -68,11 +68,11 @@ class Square extends Terminal {
 class Circle extends Terminal {
   static ARG_ORDER = [...Terminal.ARG_ORDER, "s", "c", "r"]
 
-  static ARGS = Object.assign(Terminal.ARGS, {
-    "size" : validatePostiveNumberOrZero,
-    "color" : acceptAllStrings,
+  static ARGS = Object.assign({
+    "s" : validatePostiveNumberOrZero,
+    "c" : acceptAllStrings,
     "r": validateNumber,
-  })
+  }, Terminal.ARGS)
 
   constructor(x = 0, y = 0, size = 1, color = "black", r = 0) {
     super(x, y);
