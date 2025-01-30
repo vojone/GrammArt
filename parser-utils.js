@@ -60,6 +60,11 @@ function validateNumber(n) {
   return isNaN(result) ? null : result;
 }
 
+function numberFromZeroToOne(n) {
+  let result = parseFloat(n);
+  return (isNaN(result) || result > 1 || result < 0) ? null : result;
+}
+
 function validatePostiveNumberOrZero(n) {
   let result = parseFloat(n);
   return (isNaN(result) || result < 0) ? null : result;
@@ -67,4 +72,20 @@ function validatePostiveNumberOrZero(n) {
 
 function acceptAllStrings(s) {
   return s;
+}
+
+function acceptRGBString(node) {
+  const channels = node.childrenForFieldName("channel");
+  let result = [];
+  for (let c = 0; c < 3; c++) {
+    const channelStr = channels[c].text;
+    let channelVal = parseFloat(channelStr);
+    if(isNaN(channelVal) || channelVal < 0 || channelVal > 255) {
+      return null;
+    }
+    else {
+      result.push(channelVal);
+    }
+  }
+  return result;
 }

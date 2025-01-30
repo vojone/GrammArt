@@ -1,5 +1,9 @@
 # GrammArt
-Simple clientside JS application for creating context free art using user defined grammar.
+Simple clientside JS application for creating context free art using user defined grammars. These grammars are defined in GrammArt context free graphics language (GCFG) highly inspired by language used by other context free art project (such as [CInk2](TODO)).
+
+## Author
+
+Vojtěch Dvořák
 
 ## How to develop
 
@@ -9,7 +13,7 @@ Initialize environment (`npm` needs to be installed first):
 ./init.sh
 ```
 
-Generate the grammar for GrammArt language (subset of CFG):
+Generate the grammar of GrammArt CFG language (GCFG):
 
 ```
 cd tree-sitter-grammartcfg
@@ -17,13 +21,21 @@ npx tree-sitter-cli generate
 npx tree-sitter build --wasm
 ```
 
-Generate JS files containing buffers with contents of WASM files:
+Generate JS files containing buffers with contents of WASM files (to run project locally without local web server):
 
 ```
 mkdir dist
 python3 to-base64.py tree-sitter-grammartcfg/tree-sitter-grammartcfg.wasm TREE_SITTER_CFG_WASM array >dist/tree-sitter-grammartcfg-base64.js
 python3 to-base64.py deps/tree-sitter.wasm TREE_SITTER_WASM >dist/tree-sitter-base64.js
 ```
+
+## TODOs and ideas
+
+- Language enrichment - support of nonterminal comprehension (e. g. `5*[x: 10 y: 10]square{}` ),
+
+- Night mode of UI
+
+- Better mobile version of UI
 
 
 ## Third party dependencies

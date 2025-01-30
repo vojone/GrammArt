@@ -101,7 +101,9 @@
                     <div id="code-editor-wrapper">
                         <div id="line-numbering"></div>
                         <div id="code-wrapper" class="flex-grow-1">
-                            <div  id="code-editor" class="code w-100" spellcheck="false" contenteditable>startshape r
+                            <div  id="code-editor" class="code w-100" spellcheck="false" contenteditable>global { 200 200 }
+
+startshape r
 
 rule r { a { x: 5 y: -5 r: 10 } }
 rule a 0.7 { square { } a { 1 1 r: 10 s: 0.99 } }</div>
@@ -135,7 +137,7 @@ rule a 0.7 { square { } a { 1 1 r: 10 s: 0.99 } }</div>
 
                 <div id="canvas-window" class="flex-fill flex-grow-2 d-flex justify-content-around  flex-column">
                     <div id="canvas-wrapper">
-                        <canvas id="main-canvas" class="align-self-center" height="1000" width="2500"></canvas>
+                        <canvas id="main-canvas" class="align-self-center" height="600" width="500"></canvas>
                     </div>
                     <div id="canvas-controls" class="d-flex controls justify-content-center m-2">
                         <button type="button" data-bs-toggle="modal" data-bs-target="#save-modal" class="btn btn-primary btn-sm" id="canvas-export" title="Export (Alt+Shift+E)"><i class="bi bi-image"></i>&nbsp;Export</button>

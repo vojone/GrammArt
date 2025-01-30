@@ -409,6 +409,7 @@ class Highlighter extends Traverser {
       case "rule":
       case "square":
       case "circle":
+      case "global":
         Formatter.formatNode(ctx, node, "kw");
         break;
 

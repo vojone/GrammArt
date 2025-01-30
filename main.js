@@ -95,6 +95,7 @@ function compile(codeEditor, parser, compiler, interpreter) {
 
   const tree = parser.parse(code);
   const grammar = compiler.compile(tree, code);
+  console.log(grammar);
   interpreter.setGrammar(grammar);
   interpreter.init();
 }
@@ -154,7 +155,7 @@ async function setup(params) {
   codeEditor.init();
 
   let compiler = new Compiler();
-  let interpreter = new Interpreter(new InitialCtx(250, 250, 10, "black", 0), $("#main-canvas"));
+  let interpreter = new Interpreter(new InitialCtx(0, 0, 10, [0, 0, 0], 0), $("#main-canvas"));
 
   sessionStorage.setItem("test_val", "value");
   let data = sessionStorage.getItem("test_val");

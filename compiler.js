@@ -8,13 +8,15 @@ class Compiler extends Traverser {
     let grammar = new Grammar([], null, {});
     this.inorder(tree, Compiler.compileNode, { "grammar": grammar, "sourceCode" : code });
     root = tree.rootNode;
-    //TODO: Check if entry point exists
     return grammar;
   }
 
   static compileNode(node, ctx) {
     let skipDescendants = false;
     switch (node.type) {
+      case "global_settings":
+        ctx.grammar.settings = Compiler.compileGlobalSettings(node);
+        break;
       case "shape":
         let entryPointNode = node.childrenForFieldName("entry_point")[0];
         ctx.grammar.entryPoint = entryPointNode.text;
@@ -48,6 +50,12 @@ class Compiler extends Traverser {
     }
 
     return skipDescendants;
+  }
+
+  static compileGlobalSettings(node) {
+    let argumentsNode = getChildByFieldName(node, "arguments");
+    let [unnamedArgs, namedArgs] = Compiler.compileArguments(argumentsNode);
+    return Compiler.createGlobalSettings(unnamedArgs, namedArgs);
   }
 
   static compileTerminal(terminalNode) {
@@ -105,6 +113,13 @@ class Compiler extends Traverser {
     const pNamed = Compiler._processNamedArgs(typeCls, namedArgs);
     const merged = Compiler._mergeArgs(pUnnamed, pNamed);
     return new typeCls(...Compiler._createArgArray(typeCls, merged));
+  }
+
+  static createGlobalSettings(unnamedArgs, namedArgs) {
+    const pUnnamed = Compiler._processUnnamedArgs(GlobalSettings, unnamedArgs);
+    const pNamed = Compiler._processNamedArgs(GlobalSettings, namedArgs);
+    const merged = Compiler._mergeArgs(pUnnamed, pNamed);
+    return new GlobalSettings(...Compiler._createArgArray(GlobalSettings, merged));
   }
 
   static createNonTerminal(id, unnamedArgs, namedArgs) {

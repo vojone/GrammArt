@@ -103,10 +103,9 @@ module.exports = grammar({
 
     color: $ => seq(
       field("scheme",
-        choice(
+        //choice(
           "rgb",
-          "rgba",
-        ),
+        //),
       ),
       token.immediate("("),
       field("channel",

@@ -85,3 +85,11 @@ function loadTextFileInput(loadTextFn, encoding = "UTF-8") {
 function padZero(num) {
   return num <= 9 ? `0${num}` : `${num}`;
 }
+
+function channelsToRGB(channelsArr) {
+  return `rgb(${channelsArr[0]} ${channelsArr[1]} ${channelsArr[2]})`
+}
+
+function clipSum(lop, rop, lbound, hbound) {
+  return Math.min(Math.max(lop + rop, lbound), hbound)
+}

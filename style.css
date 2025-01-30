@@ -56,6 +56,9 @@
     position: absolute;
     margin: 20px;
     box-shadow: 1px 1px 30px lightgray;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
 }
 
 
