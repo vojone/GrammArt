@@ -16,10 +16,10 @@ $(document).ready(() => {
     }
     await setup();
 
-    // Hide spinner, show loader
-    finishLoading();
+    // Hide spinner, set default example
     setupDraggableCanvas();
     centerCanvas();
+    finishLoading();
   })();
 });
 
@@ -167,6 +167,7 @@ async function setup(params) {
     parser
   );
   codeEditor.init();
+  codeEditor.setCode(CODE_EXAMPLES[0]);
 
   let compiler = new Compiler();
   let interpreter = new Interpreter(new InitialCtx(0, 0, 10, [0, 0, 0], 0), $("#main-canvas"));
@@ -283,4 +284,18 @@ async function setup(params) {
       $("#toggle-window-button").removeClass("hidden");
     }
   });
+
+  // TODO - more extensible examples
+  $("#first-example").click(() => {
+    codeEditor.setCode(CODE_EXAMPLES[0]);
+  });
+
+  $("#second-example").click(() => {
+    codeEditor.setCode(CODE_EXAMPLES[1]);
+  });
+
+  $("#third-example").click(() => {
+    codeEditor.setCode(CODE_EXAMPLES[2]);
+  });
+
 }
