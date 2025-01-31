@@ -79,17 +79,17 @@ class Compiler extends Traverser {
     let namedArgs = {};
     args.forEach((argNode) => {
       let argName = getStringByFieldName(argNode, "name");
-      let argVal = getStringByFieldName(argNode, "value");
+      let argValNode = getChildByFieldName(argNode, "value");
 
       if(Object.keys(namedArgs).length > 0 && argName === null) {
         throw new Error("Unnamed argument after named ones!");
       }
 
       if(argName !== null) {
-        namedArgs[argName] = argVal;
+        namedArgs[argName] = argValNode;
       }
       else {
-        unnamedArgs.push(argVal);
+        unnamedArgs.push(argValNode);
       }
     });
 
@@ -136,16 +136,16 @@ class Compiler extends Traverser {
 
     let result = {};
     for (let index = 0; index < args.length; index++) {
-      const argStr = args[index];
+      const argNode = args[index];
       const argName = smybolCls.ARG_ORDER[index];
 
       if(!Object.hasOwn(smybolCls.ARGS, argName)) {
         throw new Error(`Internal error! Unknown argument '${argName}'!`);
       }
 
-      const argVal = smybolCls.ARGS[argName](argStr);
+      const argVal = smybolCls.ARGS[argName](argNode);
       if(argVal === null) {
-        throw new Error(`Cannot parse value ${argStr}!`);
+        throw new Error(`Cannot parse value ${argNode.text}!`);
       }
 
       result[argName] = argVal;
@@ -156,14 +156,14 @@ class Compiler extends Traverser {
 
   static _processNamedArgs(symbolCls, args) {
     let result = {};
-    for (const [key, value] of Object.entries(args)) {
+    for (const [key, valueNode] of Object.entries(args)) {
       if(!Object.hasOwn(symbolCls.ARGS, key)) {
         throw new Error(`Internal error! Unknown argument '${key}'!`);
       }
 
-      const argVal = symbolCls.ARGS[key](value);
+      const argVal = symbolCls.ARGS[key](valueNode);
       if(argVal === null) {
-        throw new Error(`Cannot parse value ${value}!`);
+        throw new Error(`Cannot parse value ${valueNode.text}!`);
       }
 
       result[key] = argVal;

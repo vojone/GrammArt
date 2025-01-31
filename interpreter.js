@@ -2,10 +2,10 @@ class GlobalSettings {
   static ARG_ORDER = ["w", "h", "bg", "bga"]
 
   static ARGS = {
-    "w" : validateNumber,
-    "h" : validateNumber,
-    "bg" : acceptAllStrings,
-    "bga" : numberFromZeroToOne,
+    "w" : acceptNumber,
+    "h" : acceptNumber,
+    "bg" : acceptRGBString,
+    "bga" : acceptNumberZeroToOne,
   }
 
   constructor(w, h, background, alpha) {
@@ -32,14 +32,14 @@ class NonTerminal extends MSymbol {
   static ARG_ORDER = ["x", "y", "s", "r", "c", "a", "cc", "ca"]
 
   static ARGS = {
-    "x" : validateNumber,
-    "y" : validateNumber,
-    "s" : validatePostiveNumberOrZero,
-    "r" : validateNumber,
-    "c" : acceptAllStrings,
-    "a" : numberFromZeroToOne,
-    "cc" : acceptAllStrings,
-    "ca" : validateNumber,
+    "x" : acceptNumber,
+    "y" : acceptNumber,
+    "s" : acceptPositiveNumberOrZero,
+    "r" : acceptNumber,
+    "c" : acceptRGBString,
+    "a" : acceptNumberZeroToOne,
+    "cc" : acceptRGBDiffString,
+    "ca" : acceptNumber,
   }
 
   constructor(id, cx = 0, cy = 0, csize = 1, r = 0, color = null, alpha = null, ccolor = [0, 0, 0], calpha = 0) {
@@ -61,12 +61,12 @@ class Terminal extends MSymbol {
   static ARG_ORDER = ["x", "y", "s", "c", "r", "a"]
 
   static ARGS = {
-    "x" : validateNumber,
-    "y" : validateNumber,
-    "s" : validatePostiveNumberOrZero,
-    "c" : acceptAllStrings,
-    "r" : validateNumber,
-    "a" : numberFromZeroToOne,
+    "x" : acceptNumber,
+    "y" : acceptNumber,
+    "s" : acceptPositiveNumberOrZero,
+    "c" : acceptRGBString,
+    "r" : acceptNumber,
+    "a" : acceptNumberZeroToOne,
   }
 
   constructor(x, y, size, color, r, alpha) {
@@ -220,7 +220,7 @@ class SymbolCtx extends InitialCtx {
 
 
 class Interpreter {
-  constructor(initialCtx, canvasElement, defaultSettings = {w: 500, h: 600, bg: [255, 255, 255], bga: 1}) {
+  constructor(initialCtx, canvasElement, defaultSettings = {w: 500, h: 600, background: [255, 255, 255], alpha: 1}) {
     this.initialCtx = initialCtx;
     this.contextsQueue = [];
     this.grammar = null;
@@ -323,8 +323,8 @@ class Interpreter {
     this.canvasElement.width = defaultIfNotDefined("w");
     this.canvasElement.height = defaultIfNotDefined("h");
 
-    this.canvasElementCtx.fillStyle = channelsToRGB(defaultIfNotDefined("bg"));
-    this.canvasElementCtx.globalAlpha = defaultIfNotDefined("bga");
+    this.canvasElementCtx.fillStyle = channelsToRGB(defaultIfNotDefined("background"));
+    this.canvasElementCtx.globalAlpha = defaultIfNotDefined("alpha");
     this.canvasElementCtx.fillRect(0, 0, this.canvasElement.width, this.canvasElement.height);
   }
 

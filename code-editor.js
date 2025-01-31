@@ -309,7 +309,6 @@ class Linter extends Traverser {
       argsCnt++;
       let argName = getStringByFieldName(argNode, "name");
       let argNameNode = getChildByFieldName(argNode, "name");
-      let argVal = getStringByFieldName(argNode, "value");
       let argValNode = getChildByFieldName(argNode, "value");
 
       if(namedArgsCnt > 0 && argName === null) {
@@ -326,7 +325,7 @@ class Linter extends Traverser {
           return;
         }
 
-        const parsedArgVal = symbolCls.ARGS[argName](argVal);
+        const parsedArgVal = symbolCls.ARGS[argName](argValNode);
         if(parsedArgVal === null) {
           Formatter.formatNode(ctx, argValNode, "serr", "Invalid value!");
           Logger.nodeToMessage(ctx, argValNode, "err", `Invalid value of '${argName}'!`);
@@ -334,7 +333,7 @@ class Linter extends Traverser {
       }
       else {
         const argName = symbolCls.ARG_ORDER[argsCnt - 1];
-        const parsedArgVal = symbolCls.ARGS[argName](argVal);
+        const parsedArgVal = symbolCls.ARGS[argName](argValNode);
         if(parsedArgVal === null) {
           Formatter.formatNode(ctx, argValNode, "serr", "Invalid value!");
           Logger.nodeToMessage(ctx, argValNode, "err", `Invalid value of '${argName}'!`);

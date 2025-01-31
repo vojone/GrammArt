@@ -55,32 +55,56 @@ function getFloatByFieldName(node, name, defval = null) {
 }
 
 
-function validateNumber(n) {
-  let result = parseFloat(n);
+function acceptNumber(n) {
+  let result = parseFloat(n.text);
   return isNaN(result) ? null : result;
 }
 
-function numberFromZeroToOne(n) {
-  let result = parseFloat(n);
+function acceptNumberZeroToOne(n) {
+  let result = parseFloat(n.text);
   return (isNaN(result) || result > 1 || result < 0) ? null : result;
 }
 
-function validatePostiveNumberOrZero(n) {
-  let result = parseFloat(n);
+function acceptPositiveNumberOrZero(n) {
+  let result = parseFloat(n.text);
   return (isNaN(result) || result < 0) ? null : result;
 }
 
-function acceptAllStrings(s) {
-  return s;
+function acceptAllStrings(n) {
+  return n.text;
 }
 
 function acceptRGBString(node) {
   const channels = node.childrenForFieldName("channel");
+  if(channels.length !== 3) {
+    return null;
+  }
+
   let result = [];
   for (let c = 0; c < 3; c++) {
     const channelStr = channels[c].text;
     let channelVal = parseFloat(channelStr);
     if(isNaN(channelVal) || channelVal < 0 || channelVal > 255) {
+      return null;
+    }
+    else {
+      result.push(channelVal);
+    }
+  }
+  return result;
+}
+
+function acceptRGBDiffString(node) {
+  const channels = node.childrenForFieldName("channel");
+  if(channels.length !== 3) {
+    return null;
+  }
+
+  let result = [];
+  for (let c = 0; c < 3; c++) {
+    const channelStr = channels[c].text;
+    let channelVal = parseFloat(channelStr);
+    if(isNaN(channelVal)) {
       return null;
     }
     else {
