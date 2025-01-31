@@ -1,23 +1,24 @@
 # GrammArt
 Simple clientside JS application for creating context free art using user defined grammars. These grammars are defined in GrammArt context free graphics language (GCFG) highly inspired by language used by other context free art project (such as [CInk2](https://cink.applegrew.com/art.html)).
 
+
+![tree](results/tree.png)
+
+![spiral-cobweb](results/spiral-cobweb.png)
+
 ## Author
 
 Vojtěch Dvořák
 
-## How to install
+## How to run
 
-No installation steps are needed.
-
-## How to start
-
-Just open *index.html* in browser. Supported browser are now:
+No installation steps are needed. Just open *index.html* in browser. Supported browser are now:
 
 - **Firefox**
 - **Edge**
 - **Chrome**
 
-Support for other browsers is not guaranteed.
+Support for other browsers is not guaranteed. Although app is written in client-side JS it is recommended to have internet connection because of dependecies distributed by CDN.
 
 
 ## How to develop
