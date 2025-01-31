@@ -94,10 +94,24 @@ function compile(codeEditor, parser, compiler, interpreter) {
   interpreter.clear();
 
   const tree = parser.parse(code);
-  const grammar = compiler.compile(tree, code);
-  console.log(grammar);
-  interpreter.setGrammar(grammar);
-  interpreter.init();
+
+  // TODO
+  let no_error = true;
+  try {
+    const grammar = compiler.compile(tree, code);
+    interpreter.setGrammar(grammar);
+    interpreter.init();
+  }
+  catch (_error) {
+    no_error = false;
+    codeEditor.logger.appendMessage(new LogMessage("err", "Error while compiling the grammar :(", null, null, null));
+    console.log(_error);
+  }
+
+  if(no_error) {
+    codeEditor.logger.appendMessage(new LogMessage("success", "<b>Compiled succesfully!</b>", null, null,));
+  }
+  codeEditor.logger.refresh();
 }
 
 
