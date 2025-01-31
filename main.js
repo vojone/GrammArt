@@ -157,9 +157,10 @@ async function setup(params) {
   let compiler = new Compiler();
   let interpreter = new Interpreter(new InitialCtx(0, 0, 10, [0, 0, 0], 0), $("#main-canvas"));
 
-  sessionStorage.setItem("test_val", "value");
-  let data = sessionStorage.getItem("test_val");
-  console.log(data);
+  // TODO: Store unsaved code to session storage
+  // sessionStorage.setItem("test_val", "value");
+  // let data = sessionStorage.getItem("test_val");
+  // console.log(data);
 
   $(document).keydown(e => {
     const origEvent = e.originalEvent;

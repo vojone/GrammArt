@@ -228,6 +228,11 @@ class Linter extends Traverser {
         skipDescendants = true;
         break;
 
+      case "global_settings":
+        let argumentsNode = getChildByFieldName(node, "arguments");
+        Linter._checkArgs(ctx, GlobalSettings, argumentsNode);
+        break;
+
       case "shape":
         var entryPointName = getStringByFieldName(node, "entry_point");
         var entryPointNode = getChildByFieldName(node, "entry_point");
@@ -295,6 +300,17 @@ class Linter extends Traverser {
   }
 
   static _checkArgs(ctx, symbolCls, argumentsNode) {
+    function isNameDuplicated(checkedArgs, argName, argNameNode) {
+      if(checkedArgs.includes(argName)) {
+        Formatter.formatNode(ctx, argNameNode, "serr", "Already defined!");
+        Logger.nodeToMessage(ctx, argNameNode, "err", `Value of argument '${argName}' was already defined!`);
+        return true;
+      }
+
+      checkedArgs.push(argName);
+      return false
+    }
+
     let args = argumentsNode.childrenForFieldName("arg");
     let argsCnt = 0;
     let namedArgsCnt = 0;
@@ -305,11 +321,13 @@ class Linter extends Traverser {
       return;
     }
 
+    let checkedArgs = [];
     args.forEach((argNode) => {
       argsCnt++;
       let argName = getStringByFieldName(argNode, "name");
       let argNameNode = getChildByFieldName(argNode, "name");
       let argValNode = getChildByFieldName(argNode, "value");
+
 
       if(namedArgsCnt > 0 && argName === null) {
         Formatter.formatNode(ctx, argNode, "serr", "Unnamed argument after named ones!");
@@ -319,6 +337,10 @@ class Linter extends Traverser {
 
       if(argName !== null) {
         namedArgsCnt++;
+        if(isNameDuplicated(checkedArgs, argName, argNameNode)) {
+          return;
+        }
+
         if(!Object.hasOwn(symbolCls.ARGS, argName)) {
           Formatter.formatNode(ctx, argNameNode, "serr", "Unknown argument!");
           Logger.nodeToMessage(ctx, argNameNode, "err", `Unknown argument '${argName}'!`);
@@ -333,6 +355,10 @@ class Linter extends Traverser {
       }
       else {
         const argName = symbolCls.ARG_ORDER[argsCnt - 1];
+        if(isNameDuplicated(checkedArgs, argName, argNameNode)) {
+          return;
+        }
+
         const parsedArgVal = symbolCls.ARGS[argName](argValNode);
         if(parsedArgVal === null) {
           Formatter.formatNode(ctx, argValNode, "serr", "Invalid value!");
@@ -539,10 +565,9 @@ class CodeEditor {
 
     const tree = this.parser.parse(code);
 
-    console.log(tree.rootNode.toString());
+    //console.log(tree.rootNode.toString());
 
     const [ linterFmt, linterMessages ] = this.linter.lint(tree, code);
-    console.log(linterMessages);
     const fmt = [ ...linterFmt, ...this.highlighter.highlight(tree, code) ];
 
     const sortedFmt = fmt.sort(FormatTag.sort);
