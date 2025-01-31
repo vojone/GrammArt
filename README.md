@@ -12,7 +12,9 @@ Vojtěch Dvořák
 
 ## How to run
 
-No installation steps are needed. Just open *index.html* in browser. Supported browser are now:
+The app is deployed here: [vojone.github.io/GrammArt/](https://vojone.github.io/GrammArt/).
+
+If you want to run the app localy, no installation steps are needed. Just open *index.html* in browser. Supported browser are now:
 
 - **Firefox**
 - **Edge**

@@ -1,2 +1,3 @@
 tree-sitter-grammartcfg/src/*
 tree-sitter-grammartcfg/tree-sitter-grammartcfg.wasm
+*.zip
