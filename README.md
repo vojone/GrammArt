@@ -12,7 +12,7 @@ Vojtěch Dvořák
 
 ## How to run
 
-The app is deployed here: [vojone.github.io/GrammArt/](https://vojone.github.io/GrammArt/).
+The app is deployed here: [vojone.github.io/grammart/](https://vojone.github.io/grammart/).
 
 If you want to run the app localy, no installation steps are needed. Just open *index.html* in browser. Supported browser are now:
 
