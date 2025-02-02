@@ -15,12 +15,18 @@ rule a 0.1 { circle{} a { 0 -0.8 r: -3 s: 0.98 } }
 // branching
 rule a 0.02 {
 	circle{}
-	a { 0 -0.8 r: -10 s: 0.98 }
-	a { 0 -0.8 r: 10 s: 0.98 }
+	a { 0 -0.8 r: -20 s: 0.98 }
+	a { 0 -0.8 r: 20 s: 0.98 }
+}
+rule a 0.01 {
+	circle{}
+	a { 0 -0.8 r: -30 s: 0.97 }
+	a { 0 -0.8 r: 5 s: 0.97 }
+	a { 0 -0.8 r: 30 s: 0.97 }
 }
 
 // end of a branch
-rule a 0.001 {}
+rule a 0.0008 {}
 
 `,
 `// Spiral

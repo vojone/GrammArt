@@ -2,9 +2,9 @@
 Simple clientside JS application for creating context free art using user defined grammars. These grammars are defined in GrammArt context free graphics language (GCFG) highly inspired by language used by other context free art project (such as [CInk2](https://cink.applegrew.com/art.html)).
 
 
-![tree](results/tree.png)
+![tree](results/tree.png=250x250)
 
-![spiral-cobweb](results/spiral-cobweb.png)
+![spiral-cobweb](results/spiral-cobweb.png=250x250)
 
 ## Author
 

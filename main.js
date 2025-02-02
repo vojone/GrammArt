@@ -109,7 +109,9 @@ function compile(codeEditor, parser, compiler, interpreter) {
   }
 
   if(no_error) {
-    codeEditor.logger.appendMessage(new LogMessage("success", "<b>Compiled succesfully!</b>", null, null,));
+    let currentDate = new Date()
+    let timeString = `${padZero(currentDate.getHours())}:${padZero(currentDate.getMinutes())}:${padZero(currentDate.getSeconds())}`;
+    codeEditor.logger.appendMessage(new LogMessage("success", `${timeString} <b>Compiled succesfully!</b>`, null, null,));
   }
   codeEditor.logger.refresh();
 }
