@@ -3,7 +3,6 @@ Simple clientside JS application for creating context free art using user define
 
 
 <img src="results/tree.png" alt="Tree" width="250" height="250">
-
 <img src="results/spiral-cobweb.png" alt="Spiral cobweb" width="250" height="250">
 
 ## Author
