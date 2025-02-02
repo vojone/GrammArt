@@ -220,6 +220,8 @@ class SymbolCtx extends InitialCtx {
 
 
 class Interpreter {
+  SPF = 5; // Steps per frame
+
   constructor(initialCtx, canvasElement, defaultSettings = {w: 500, h: 600, background: [255, 255, 255], alpha: 1}) {
     this.initialCtx = initialCtx;
     this.contextsQueue = [];
@@ -343,7 +345,11 @@ class Interpreter {
   }
 
   makeStepUntilEnd(_time) {
-    let finished = this.makeStep();
+    let finished = false;
+    console.log(this.SPF);
+    for (let i = 0; i < this.SPF && !finished; i++) {
+      finished &= this.makeStep();
+    }
     if(!finished && this.isRunning) {
       requestAnimationFrame(() => {
         this.makeStepUntilEnd();
