@@ -26,7 +26,7 @@ Support for other browsers is not guaranteed. Although app is written in client-
 Initialize environment (`npm` needs to be installed first):
 
 ```
-./init.sh
+./scripts/init.sh
 ```
 
 Generate the grammar of GrammArt CFG language (GCFG):
