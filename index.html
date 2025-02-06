@@ -79,17 +79,17 @@
                                 <div>
                                     <select class="form-select" id="export-resolution" aria-label="Resolution of exported image">
                                         <option selected value="1">x1</option>
-                                        <!-- <option value="2">x2</option>
+                                        <option value="2">x2</option>
                                         <option value="4">x4</option>
+                                        <option value="8">x8</option>
                                         <option value="16">x16</option>
-                                        <option value="32">x32</option> -->
                                     </select>
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary canvas-export-close" data-bs-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary" id="canvas-export-button">Export</button>
+                            <button type="button" class="btn btn-primary" id="canvas-export-button"><span id="export-spinner" class="spinner-border spinner-border-sm mr-1" style="display:none;"></span><span class="b-text">Export</span></button>
                         </div>
                     </div>
                 </div>

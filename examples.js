@@ -24,9 +24,8 @@ rule a 0.01 {
 	a { 0 -0.8 r: 5 s: 0.97 }
 	a { 0 -0.8 r: 30 s: 0.97 }
 }
-
 // end of a branch
-rule a 0.0008 {}
+//rule a 0.0008 {}
 
 `,
 `// Spiral

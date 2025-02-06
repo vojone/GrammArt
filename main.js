@@ -249,12 +249,23 @@ async function setup(params) {
   });
 
   $("#canvas-export-button").click(() => {
-    let canvaBoundingRect = $("#main-canvas")[0];
-    let canvasWidth = canvaBoundingRect.width;
-    let canvasHeight = canvaBoundingRect.height;
-    let resolutionFactor = $("#export-resolution").val();
+    disable($("#canvas-export-button"));
+    $("#canvas-export-button .b-text").html("Exporting...");
+    $("#export-spinner").show();
 
-    downloadCanvasContent("main-canvas", $("#export-name").val(), canvasWidth * resolutionFactor, canvasHeight * resolutionFactor);
+    // Hack to allow the button to redraw
+    setTimeout(() => {
+      exportCanvasImage(
+        interpreter,
+        $("#main-canvas"),
+        $("#export-name").val(),
+        $("#export-resolution").val()
+      );
+
+      $("#canvas-export-button .b-text").html("Export");
+      $("#export-spinner").hide();
+      enable($("#canvas-export-button"));
+    });
   });
 
   $("#canvas-run").click(() => {
@@ -311,4 +322,23 @@ async function setup(params) {
     codeEditor.setCode(CODE_EXAMPLES[2]);
   });
 
+}
+
+function exportCanvasImage(interpreter, canvas, name, resolutionFactor = 1) {
+  let canvaBoundingRect = canvas[0];
+  let canvasWidth = canvaBoundingRect.width;
+  let canvasHeight = canvaBoundingRect.height;
+
+  let exportCanvas = document.createElement("canvas");
+  exportCanvas.height = canvasHeight * resolutionFactor;
+  exportCanvas.width = canvasWidth * resolutionFactor;
+  let exportCanvasCtx = exportCanvas.getContext("2d");
+
+  // Replay the whole drawing process in bigger scale
+  exportCanvasCtx.scale(resolutionFactor, resolutionFactor);
+  interpreter.history.forEach(([f, params]) => {
+    f(exportCanvasCtx, ...params);
+  });
+
+  downloadCanvasContent(exportCanvas, name, exportCanvas.width, exportCanvas.height);
 }

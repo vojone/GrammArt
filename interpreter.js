@@ -225,6 +225,7 @@ class Interpreter {
   constructor(initialCtx, canvasElement, defaultSettings = {w: 500, h: 600, background: [255, 255, 255], alpha: 1}) {
     this.initialCtx = initialCtx;
     this.contextsQueue = [];
+    this.history = [];
     this.grammar = null;
     this.canvasElement = canvasElement[0];
     this.canvasElementCtx = canvasElement[0].getContext("2d");
@@ -246,6 +247,34 @@ class Interpreter {
 
   _alphaSum(a1, a2) {
     return clipSum(a1, a2, 0, 1);
+  }
+
+  static _canvasFill(canvasCtx, w, h, background, alpha) {
+    canvasCtx.fillStyle = background;
+    canvasCtx.globalAlpha = alpha;
+    canvasCtx.fillRect(0, 0, w, h);
+  }
+
+  static _circle(canvasCtx, x, y, size, color, alpha) {
+    canvasCtx.fillStyle = channelsToRGB(color);
+    canvasCtx.globalAlpha = alpha;
+    canvasCtx.beginPath();
+    canvasCtx.arc(x, y, size * 0.5, 0, 2 * Math.PI);
+    canvasCtx.fill();
+  }
+
+  static _square(canvasCtx, x, y, cornerX, cornerY, size, rads, color, alpha) {
+    canvasCtx.save();
+
+    canvasCtx.translate(cornerX, cornerY);
+    canvasCtx.rotate(rads);
+    canvasCtx.translate(-cornerX, -cornerY);
+
+    canvasCtx.fillStyle = channelsToRGB(color);
+    canvasCtx.globalAlpha = alpha;
+    canvasCtx.fillRect(x, y, size, size);
+
+    canvasCtx.restore();
   }
 
   static deg2Rads(deg) {
@@ -324,10 +353,17 @@ class Interpreter {
 
     this.canvasElement.width = defaultIfNotDefined("w");
     this.canvasElement.height = defaultIfNotDefined("h");
+    let bg = channelsToRGB(defaultIfNotDefined("background"));
+    let alpha = defaultIfNotDefined("alpha");
 
-    this.canvasElementCtx.fillStyle = channelsToRGB(defaultIfNotDefined("background"));
-    this.canvasElementCtx.globalAlpha = defaultIfNotDefined("alpha");
-    this.canvasElementCtx.fillRect(0, 0, this.canvasElement.width, this.canvasElement.height);
+    Interpreter._canvasFill(
+      this.canvasElementCtx,
+      this.canvasElement.width,
+      this.canvasElement.height,
+      bg,
+      alpha
+    );
+    this.history.push([Interpreter._canvasFill, [this.canvasElement.width, this.canvasElement.height, bg, alpha]]);
   }
 
   step() {
@@ -410,17 +446,8 @@ class Interpreter {
     let color = squareObject.color !== null ? squareObject.color : ctx.color;
     let alpha = squareObject.alpha !== null ? squareObject.alpha : ctx.alpha;
 
-    this.canvasElementCtx.save();
-
-    this.canvasElementCtx.translate(cornerX, cornerY);
-    this.canvasElementCtx.rotate(rads);
-    this.canvasElementCtx.translate(-cornerX, -cornerY);
-
-    this.canvasElementCtx.fillStyle = channelsToRGB(color);
-    this.canvasElementCtx.globalAlpha = alpha;
-    this.canvasElementCtx.fillRect(x, y, size, size);
-
-    this.canvasElementCtx.restore();
+    Interpreter._square(this.canvasElementCtx, x, y, cornerX, cornerY, size, rads, color, alpha);
+    this.history.push([Interpreter._square, [x, y, cornerX, cornerY, size, rads, color, alpha]]);
   }
 
   drawCircle(ctx, squareObject) {
@@ -437,14 +464,12 @@ class Interpreter {
     let color = squareObject.color !== null ? squareObject.color : ctx.color;
     let alpha = squareObject.alpha !== null ? squareObject.alpha : ctx.alpha;
 
-    this.canvasElementCtx.fillStyle = channelsToRGB(color);
-    this.canvasElementCtx.globalAlpha = alpha;
-    this.canvasElementCtx.beginPath();
-    this.canvasElementCtx.arc(x, y, size * 0.5, 0, 2 * Math.PI);
-    this.canvasElementCtx.fill();
+    Interpreter._circle(this.canvasElementCtx, x, y, size, color, alpha);
+    this.history.push([Interpreter._circle, [x, y, size, color, alpha]]);
   }
 
   clear() {
     this.canvasElementCtx.clearRect(0, 0, this.canvasElement.width,  this.canvasElement.height);
+    this.history = [];
   }
 }
