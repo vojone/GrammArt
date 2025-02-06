@@ -6,6 +6,8 @@
 delete WebAssembly.instantiateStreaming;
 const Parser = window.TreeSitter;
 
+var afterStartup = null;
+
 $(document).ready(() => {
   (async() => {
     if(typeof TREE_SITTER_WASM === "undefined" || TREE_SITTER_WASM === null) {
@@ -20,6 +22,10 @@ $(document).ready(() => {
     setupDraggableCanvas();
     centerCanvas();
     finishLoading();
+
+    if(afterStartup != null) {
+      afterStartup();
+    }
   })();
 });
 
@@ -286,6 +292,11 @@ async function setup(params) {
       $("#toggle-window-button").removeClass("hidden");
     }
   });
+
+  afterStartup = () => {
+    compile(codeEditor, parser, compiler, interpreter);
+    runCompiled(interpreter);
+  };
 
   // TODO - more extensible examples
   $("#first-example").click(() => {
