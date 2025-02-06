@@ -346,7 +346,7 @@ class Interpreter {
 
   makeStepUntilEnd(_time) {
     let finished = false;
-    console.log(this.SPF);
+    //console.log(this.SPF);
     for (let i = 0; i < this.SPF && !finished; i++) {
       finished &= this.makeStep();
     }
