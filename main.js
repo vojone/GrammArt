@@ -217,7 +217,7 @@ async function setup(params) {
     }).click();
   });
   $("#code-format").click(() => {
-    codeEditor.formatCode();
+    $("#code-color-picker")[0].click();
   });
   $("#code-compile").click(() => {
     compile(codeEditor, parser, compiler, interpreter);
@@ -309,6 +309,16 @@ async function setup(params) {
     runCompiled(interpreter);
   };
 
+  let rgbColorPicker = new RGBColorPicker($("#rgb-color-picker.color-picker"));
+  $("#rgb-pallete-pick-button").click(() => {
+    codeEditor.insert(rgbColorPicker.getString());
+    $("#pallete-modal").modal("hide");
+  });
+
+  $("#pallete-modal").on("hidden.bs.modal", () => {
+    codeEditor.focus();
+  });
+
   // TODO - more extensible examples
   $("#first-example").click(() => {
     codeEditor.setCode(CODE_EXAMPLES[0]);
@@ -322,6 +332,83 @@ async function setup(params) {
     codeEditor.setCode(CODE_EXAMPLES[2]);
   });
 
+}
+
+class ChannelControls {
+  constructor(range, input, display, refreshFn) {
+    this.range = range;
+    this.input = input;
+    this.display = display;
+    this.refreshFn = refreshFn;
+  }
+
+  static findElementsAndCreate(wrapperElement, channelName, refreshFn) {
+    return new ChannelControls(
+      wrapperElement.find(`input[type=range][data-channel=${channelName}]`),
+      wrapperElement.find(`input[type=number][data-channel=${channelName}]`),
+      wrapperElement.find(`div.color-picker-display[data-channel=${channelName}]`),
+      refreshFn,
+    )
+  }
+
+  setup(initialValue) {
+    this.range.on("input", () => {
+      this.input.val(this.range.val());
+      this.refresh();
+    });
+    this.input.on("input", () => {
+      this.range.val(this.input.val());
+      this.refresh();
+    });
+
+    this.set(initialValue);
+    this.refresh();
+  }
+
+  refresh() {
+    this.refreshFn(this, this.get());
+  }
+
+  set(val) {
+    this.input.val(val);
+    this.range.val(val);
+    this.refresh();
+  }
+
+  get() {
+    return this.input.val();
+  }
+}
+
+class RGBColorPicker {
+  constructor(colorPickerElement, defaultColor = [128, 128, 128]) {
+    this.colorPickerElement = colorPickerElement;
+    this.resultElement = this.colorPickerElement.find(`div.color-picker-display-result`);
+
+    this.channelControls = {
+      "r" : ChannelControls.findElementsAndCreate(this.colorPickerElement, "r", (ctrls, c) => { ctrls.display.css("background-color", `rgba(255, 0, 0, ${c/255})`); this.refresh(); }),
+      "g" : ChannelControls.findElementsAndCreate(this.colorPickerElement, "g", (ctrls, c) => { ctrls.display.css("background-color", `rgba(0, 255, 0, ${c/255})`); this.refresh(); }),
+      "b" : ChannelControls.findElementsAndCreate(this.colorPickerElement, "b", (ctrls, c) => { ctrls.display.css("background-color", `rgba(0, 0, 255, ${c/255})`); this.refresh(); }),
+    }
+
+    Object.entries(this.channelControls).forEach(([c, ctrls], i) => {
+      ctrls.setup(defaultColor[i]);
+    });
+  }
+
+  refresh() {
+    const [r, g, b] = this.get();
+    this.resultElement.css("background-color", `rgb(${r}, ${g}, ${b})`);
+  }
+
+  get() {
+    return [ this.channelControls.r.get(), this.channelControls.g.get(), this.channelControls.b.get() ];
+  }
+
+  getString() {
+    const [r, g, b] = this.get();
+    return `rgb(${r} ${g} ${b})`
+  }
 }
 
 function exportCanvasImage(interpreter, canvas, name, resolutionFactor = 1) {

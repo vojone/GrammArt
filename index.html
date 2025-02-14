@@ -79,7 +79,6 @@
                                 <div>
                                     <select class="form-select" id="export-resolution" aria-label="Resolution of exported image">
                                         <option selected value="1">x1</option>
-                                        <option value="2">x2</option>
                                         <option value="4">x4</option>
                                         <option value="8">x8</option>
                                         <option value="16">x16</option>
@@ -95,6 +94,49 @@
                 </div>
             </div>
 
+            <div class="modal fade" id="pallete-modal" tabindex="-1" role="dialog" aria-labelledby="pallete-modal-label" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="pallete-modal-label">Pick color</h5>
+                            <button type="button" class="canvas-export-close close" data-bs-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <table id="rgb-color-picker" class="color-picker">
+                                <tr>
+                                    <td>R:</td>
+                                    <td><input type="range" min="0" max="255" step="1" class="form-range color-picker-range" data-channel="r"></td>
+                                    <td><input type="number" min="0" max="255" step="1" class="form-control color-picker-input" data-channel="r"></td>
+                                    <td><div class="color-picker-display" data-channel="r"></div></td>
+                                </tr>
+                                <tr>
+                                    <td>G:</td>
+                                    <td><input type="range" min="0" max="255" step="1" class="form-range color-picker-range" data-channel="g"></td>
+                                    <td><input type="number" min="0" max="255" step="1" class="form-control color-picker-input" data-channel="g"></td>
+                                    <td><div class="color-picker-display" data-channel="g"></div></td>
+                                </tr>
+                                <tr>
+                                    <td>B:</td>
+                                    <td><input type="range" min="0" max="255" step="1" class="form-range color-picker-range" data-channel="b"></td>
+                                    <td><input type="number" min="0" max="255" step="1" class="form-control color-picker-input" data-channel="b"></td>
+                                    <td><div class="color-picker-display" data-channel="b"></div></td>
+                                </tr>
+                                <tr>
+                                    <td>Result: </td>
+                                    <td colspan="3"><div class="color-picker-display-result"></div></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" id="rgb-pallete-pick-button">Pick</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div id="content-wrapper" style="display:none" class="flex-lg-row flex-column-reverse flex-fill">
 
                 <div id="code-window" class="flex-fill flex-column">
@@ -104,7 +146,7 @@
                     <div id="code-editor-wrapper">
                         <div id="line-numbering"></div>
                         <div id="code-wrapper" class="flex-grow-1">
-                            <div  id="code-editor" class="code w-100" spellcheck="false" contenteditable>global { 500 500 rgb(255 0 0) }
+                            <div tabindex="-1" id="code-editor" class="code w-100" spellcheck="false" contenteditable>global { 500 500 rgb(255 0 0) }
 
 startshape r
 
@@ -131,9 +173,9 @@ rule a 0.7 { square { } a { 1 1 r: 10 s: 0.99 cc: rgb(5 5 5) } }
                         <div class="d-flex controls">
                             <button type="button" class="btn-sm btn-primary" id="code-save"><i class="bi bi-save"></i>&nbsp;Save</button>
                             <button type="button" class="btn-sm btn-primary" id="code-load"><i class="bi bi-folder2-open"></i>&nbsp;Open</button>
-                            <button type="button" class="btn-sm btn-primary" id="code-format">Format</button>
                         </div>
                         <div class="d-flex controls">
+                            <button type="button" data-bs-toggle="modal" data-bs-target="#pallete-modal" class="btn-sm btn-primary" id="color-pallete"><i class="bi bi-palette"></i>&nbsp;Pallete</button>
                             <button type="button" class="btn-sm btn-primary" id="code-compile">Compile</button>
                             <button type="button" class="btn-sm btn-success" id="code-compile-run" title="Ctrl+Enter">Compile&nbsp;&amp;&nbsp;Run</button>
                         </div>

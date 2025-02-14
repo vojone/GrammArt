@@ -482,6 +482,13 @@ class CodeEditor {
     this.formatCode();
     this.initNumbering();
 
+    this.editor[0].addEventListener("focus", () => {
+      let sel = window.getSelection();
+      let range = sel.getRangeAt(0);
+      let offset = this.getOffsetInEditor(range.startContainer, range.startOffset);
+      this.cursorOffset = offset;
+    });
+
     this.editor[0].addEventListener("beforeinput", (e) => {
       this.saveRevision();
 
@@ -528,18 +535,29 @@ class CodeEditor {
         let sel = window.getSelection();
         let range = sel.getRangeAt(0);
         let offset = this.getOffsetInEditor(range.startContainer, range.startOffset);
-        let value = this.editor.text();
-        let newValue = value.substring(0, offset) + TAB_SEQUENCE + value.substring(offset);
-        this.editor.text(newValue);
-        this.putCursorToOffset(offset + TAB_SEQUENCE.length);
-
-        this.cursorOffset = offset + TAB_SEQUENCE.length
-        this.formatCode();
+        this.insert(TAB_SEQUENCE, offset);
         this._restoreCursor();
 
         return false;
       }
     });
+  }
+
+  focus() {
+    this.editor[0].focus();
+    this.putCursorToOffset(this.cursorOffset);
+  }
+
+  insert(str, offset = null) {
+    this.saveRevision();
+    offset = offset === null ? this.cursorOffset : offset;
+    let value = this.editor.text();
+    let newValue = value.substring(0, offset) + str + value.substring(offset);
+    this.editor.text(newValue);
+    this.putCursorToOffset(offset + str.length);
+
+    this.cursorOffset = offset + str.length;
+    this.formatCode();
   }
 
   saveRevision() {

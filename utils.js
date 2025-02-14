@@ -50,3 +50,7 @@ function channelsToRGB(channelsArr) {
 function clipSum(lop, rop, lbound, hbound) {
   return Math.min(Math.max(lop + rop, lbound), hbound)
 }
+
+function dec2hex(dec) {
+  return  dec.toString(16);
+}
