@@ -318,19 +318,19 @@ async function setup(params) {
     }, 0);
   });
 
-  // TODO - more extensible examples
-  $("#first-example").click(() => {
-    codeEditor.setCode(CODE_EXAMPLES[0]);
+  setupExamples(codeEditor);
+}
+
+function setupExamples(codeEditor) {
+  CODE_EXAMPLES.forEach(([name, code], index) => {
+    let activeFlag = index == 0 ? " active" : "";
+    $("#examples-dropdown-list").append(`<li><a class=\"dropdown-item${activeFlag}\" href=\"#\" id=\"example-${index}\">${name}</a></li>`);
+    $(`#example-${index}`).click(() => {
+      codeEditor.setCode(code);
+    });
   });
 
-  $("#second-example").click(() => {
-    codeEditor.setCode(CODE_EXAMPLES[1]);
-  });
-
-  $("#third-example").click(() => {
-    codeEditor.setCode(CODE_EXAMPLES[2]);
-  });
-
+  codeEditor.setCode(CODE_EXAMPLES[0][1]);
 }
 
 function exportCanvasImage(interpreter, canvas, name, resolutionFactor = 1) {

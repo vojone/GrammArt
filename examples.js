@@ -1,5 +1,7 @@
 const CODE_EXAMPLES = [
-`// Tree
+[
+  "Tree",
+  `// Tree
 global { 500 500 }
 
 startshape S
@@ -27,8 +29,10 @@ rule a 0.01 {
 // end of a branch
 //rule a 0.0008 {}
 
-`,
-`// Spiral
+`],
+[
+  "Spiral",
+  `// Spiral
 global { 500 500 rgb(255 50 50) }
 
 startshape r
@@ -36,8 +40,10 @@ startshape r
 rule r { a { x: 5 y: -5 r: 10 } }
 rule a { square { } a { 1 1 r: 10 s: 0.99 cc: rgb(5 5 5) } }
 
-`,
-`// Spiral cobweb
+`],
+[
+  "Spiral cobweb",
+  `// Spiral cobweb
 global { 500 500 }
 
 startshape S
@@ -48,5 +54,5 @@ rule a 0.9 { square {} a { 1 1 r: 10 s: 0.98 } }
 rule a 0.1 { square {} b { -1 -1 r: -10 s: 0.98 } a {} }
 rule b { square {} b { -1 -1 r: 10 s: 0.97 } }
 
-`,
+`],
 ];
