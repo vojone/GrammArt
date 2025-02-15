@@ -216,9 +216,6 @@ async function setup(params) {
       codeEditor.setCode(code);
     }).click();
   });
-  $("#code-format").click(() => {
-    $("#code-color-picker")[0].click();
-  });
   $("#code-compile").click(() => {
     compile(codeEditor, parser, compiler, interpreter);
 
@@ -316,7 +313,9 @@ async function setup(params) {
   });
 
   $("#pallete-modal").on("hidden.bs.modal", () => {
-    codeEditor.focus();
+    setTimeout(() => {
+      codeEditor.focus();
+    }, 0);
   });
 
   // TODO - more extensible examples

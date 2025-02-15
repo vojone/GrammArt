@@ -544,7 +544,6 @@ class CodeEditor {
   }
 
   focus() {
-    this.editor[0].focus();
     this.putCursorToOffset(this.cursorOffset);
   }
 
